@@ -34,6 +34,8 @@ class FetchAndProcessIcons extends Command
             $directories = $response->json();
             $totalIcons = $this->countTotalIcons($directories);
 
+            $this->info('Starting to process icons...');
+
             $bar = $this->output->createProgressBar($totalIcons);
             $bar->start();
 
