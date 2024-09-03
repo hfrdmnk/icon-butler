@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Storage;
 
 class FetchAndProcessIcons extends Command
 {
-    protected $signature = 'icons:fetch-and-process {--all : Process all icons}';
+    protected $signature = 'icons:fetch-and-process {--all : Process all icons} {--json-only : Only fetch and save JSON without processing icons}';
 
     protected $description = 'Fetch and process icons from Phosphor Icons repository';
 
@@ -20,6 +20,13 @@ class FetchAndProcessIcons extends Command
 
     public function handle()
     {
+        $iconMetadataFileURL = 'https://raw.githubusercontent.com/phosphor-icons/core/main/src/icons.ts';
+        $this->saveIconMetadataFile($iconMetadataFileURL);
+
+        if ($this->option('json-only')) {
+            return;
+        }
+
         $baseUrl = 'https://api.github.com/repos/phosphor-icons/core/contents/assets';
         $response = Http::get($baseUrl);
 
@@ -121,5 +128,89 @@ class FetchAndProcessIcons extends Command
 
         // Dispatch job to generate embedding
         GenerateIconEmbedding::dispatch($icon);
+    }
+
+    private function saveIconMetadataFile($url)
+    {
+        $response = Http::get($url);
+        if ($response->successful()) {
+            $content = $response->body();
+            Storage::put('icons/metadata.ts', $content);
+            $this->createJsonFileFromMetadata();
+        }
+    }
+
+    private function createJsonFileFromMetadata()
+    {
+        $metadata = Storage::get('icons/metadata.ts');
+        if ($metadata === null) {
+            $this->error('Failed to read metadata.ts file.');
+            return;
+        }
+        $jsonContent = $this->convertTypescriptToJson($metadata);
+        if ($jsonContent !== null) {
+            Storage::put('icons/metadata.json', $jsonContent);
+            $this->info('Successfully created metadata.json file.');
+            Storage::delete('icons/metadata.ts');
+            $this->info('Successfully deleted metadata.ts file.');
+        } else {
+            $this->error('Failed to create metadata.json file.');
+        }
+    }
+
+    private function convertTypescriptToJson($typescriptContent)
+    {
+        // Extract the icons array
+        preg_match('/export const icons = \(<const>\[(.*?)\]\) satisfies readonly IconEntry\[\];/s', $typescriptContent, $matches);
+
+        if (empty($matches[1])) {
+            return json_encode(['error' => 'Icons not found in the file'], JSON_PRETTY_PRINT);
+        }
+
+        $iconsString = $matches[1];
+
+        // Split the icons string into individual icon objects
+        $iconObjects = preg_split('/},\s*{/', $iconsString);
+
+        $transformedIcons = [];
+
+        foreach ($iconObjects as $index => $iconObject) {
+            // Add opening brace if it's not the first object
+            if ($index !== 0) {
+                $iconObject = '{' . $iconObject;
+            }
+            // Add closing brace if it's not the last object
+            if ($index !== count($iconObjects) - 1) {
+                $iconObject .= '}';
+            }
+
+            // Extract name and tags
+            preg_match('/name: "(.*?)"/', $iconObject, $nameMatch);
+            preg_match('/tags: \[([\s\S]*?)\]/', $iconObject, $tagsMatch);
+
+            if (!empty($nameMatch[1]) && !empty($tagsMatch[1])) {
+                $name = $nameMatch[1];
+                $tags = preg_split('/,\s*/', $tagsMatch[1]);
+                $tags = array_map(function ($tag) {
+                    return trim($tag, " \t\n\r\0\x0B\"");
+                }, $tags);
+
+                $transformedIcons[] = [
+                    'name' => $name,
+                    'tags' => array_values(array_filter($tags)) // Remove empty elements
+                ];
+            }
+        }
+
+        // Convert to JSON
+        $json = json_encode($transformedIcons, JSON_PRETTY_PRINT);
+        $json = json_decode($json, true);
+        foreach ($json as &$icon) {
+            $icon['tags'] = array_values(array_filter($icon['tags'], function ($tag) {
+                return !str_starts_with($tag, '*') && !str_ends_with($tag, '*');
+            }));
+        }
+        $json = json_encode($json, JSON_PRETTY_PRINT);
+        return $json;
     }
 }
