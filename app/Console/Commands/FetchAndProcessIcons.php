@@ -9,6 +9,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use ZipArchive;
 
 class FetchAndProcessIcons extends Command
 {
@@ -20,154 +21,152 @@ class FetchAndProcessIcons extends Command
 
     public function handle()
     {
-        $iconMetadataFileURL = 'https://raw.githubusercontent.com/phosphor-icons/core/main/src/icons.ts';
-        $this->createJsonFileFromMetadata($iconMetadataFileURL);
+        $this->createJsonFileFromMetadata();
 
         if ($this->option('json-only')) {
             return;
         }
 
-        $baseUrl = 'https://api.github.com/repos/phosphor-icons/core/contents/assets';
-        $response = Http::get($baseUrl);
+        $this->downloadAndExtractRepo();
 
-        if ($response->successful()) {
-            $directories = $response->json();
-            $totalIcons = $this->countTotalIcons($directories);
+        $this->processIcons();
 
-            $this->info('Starting to process icons...');
+        $this->cleanup();
 
-            $bar = $this->output->createProgressBar($totalIcons);
-            $bar->start();
-
-            foreach ($directories as $directory) {
-                if ($directory['type'] === 'dir') {
-                    $this->processDirectory($directory['name'], $directory['url'], $bar);
-                }
-            }
-
-            $bar->finish();
-            $this->newLine();
-            $this->info('Icons fetched and jobs queued for processing.');
-            $this->info('To process the jobs:');
-            $this->info('1. Ensure your queue worker is running: php artisan queue:work');
-            $this->info('2. Or, to process all queued jobs once: php artisan queue:work --stop-when-empty');
-        } else {
-            $statusCode = $response->status();
-            $errorBody = $response->body();
-            $this->error("Failed to fetch icons from the repository. Status code: $statusCode");
-            $this->error("Error message: $errorBody");
-
-            // Optionally, log the error for future reference
-            Log::error("GitHub API Error: Status $statusCode, Body: $errorBody");
-        }
+        $this->info('Icons fetched and processed successfully.');
     }
 
-    private function countTotalIcons($directories)
+    private function createJsonFileFromMetadata()
     {
-        $total = 0;
-        foreach ($directories as $directory) {
-            if ($directory['type'] === 'dir') {
-                $response = Http::get($directory['url']);
-                if ($response->successful()) {
-                    $total += count($response->json());
-                }
-            }
-        }
+        $iconMetadataFileURL = 'https://raw.githubusercontent.com/phosphor-icons/core/main/src/icons.ts';
+        $response = Http::get($iconMetadataFileURL);
 
-        return $total;
-    }
-
-    private function processDirectory($variantType, $url, $bar)
-    {
-        $response = Http::get($url);
-        if ($response->successful()) {
-            $files = $response->json();
-            foreach ($files as $file) {
-                if (pathinfo($file['name'], PATHINFO_EXTENSION) === 'svg') {
-                    $this->iconCounter++;
-                    if ($this->shouldProcessIcon()) {
-                        $this->processIcon($file['name'], $file['download_url'], $variantType);
-                    }
-                    $bar->advance();
-                }
-            }
-        }
-    }
-
-    private function shouldProcessIcon()
-    {
-        if ($this->option('all') || ! app()->environment('local')) {
-            return true;
-        }
-
-        return $this->iconCounter % 10 === 0;
-    }
-
-    private function processIcon($filename, $url, $variantType)
-    {
-        $fullIconName = pathinfo($filename, PATHINFO_FILENAME);
-
-        // Extract the base icon name without the variant
-        $iconName = $variantType === 'regular'
-            ? $fullIconName
-            : preg_replace("/-$variantType$/", '', $fullIconName);
-
-        $metadata = Storage::get('icons/metadata.json');
-        $metadata = json_decode($metadata, true);
-        $tags = [];
-        foreach ($metadata as $item) {
-            if ($item['name'] === $iconName) {
-                $tags = $item['tags'];
-                break;
-            }
-        }
-        if (empty($tags)) {
-            $this->warn("No tags found for icon: $iconName");
-        }
-
-        $svgContent = Http::get($url)->body();
-
-        // Replace fill colors with currentColor
-        $processedSvg = preg_replace('/fill="[^"]+"/', 'fill="currentColor"', $svgContent);
-
-        // Save to file system
-        $filePath = "icons/{$variantType}/{$filename}";
-        Storage::put($filePath, $processedSvg);
-
-        // Save to database
-        $icon = Icon::firstOrCreate([
-            'name' => $iconName,
-            'keywords' => json_encode($tags),
-        ]);
-        $icon->variants()->updateOrCreate(
-            ['type' => $variantType],
-            ['file_path' => $filePath]
-        );
-
-        // Dispatch job to generate embedding
-        // TODO: Only dispatch if the icon is not already embedded or has changed
-        GenerateIconEmbedding::dispatch($icon);
-    }
-
-    private function createJsonFileFromMetadata($url)
-    {
-        $response = Http::get($url);
         if ($response->successful()) {
             $content = $response->body();
-            $metadata = $content;
+            $jsonContent = $this->convertTypescriptToJson($content);
+            if ($jsonContent !== null) {
+                Storage::put('icons/metadata.json', $jsonContent);
+                $this->info('Successfully created metadata.json file.');
+            } else {
+                $this->error('Failed to create metadata.json file.');
+            }
         } else {
-            $this->error('Failed to read get metadata file from repo.');
+            $this->error('Failed to read metadata file from repo.');
+        }
+    }
 
+    private function downloadAndExtractRepo()
+    {
+        $zipUrl = 'https://github.com/phosphor-icons/core/archive/refs/heads/main.zip';
+        $zipPath = storage_path('app/icons/repo.zip');
+        $extractPath = storage_path('app/icons/temp');
+
+        $this->info('Downloading repository...');
+        file_put_contents($zipPath, file_get_contents($zipUrl));
+
+        $this->info('Extracting repository...');
+        $zip = new ZipArchive;
+        if ($zip->open($zipPath) === TRUE) {
+            $zip->extractTo($extractPath);
+            $zip->close();
+            $this->info('Repository extracted successfully.');
+        } else {
+            $this->error('Failed to extract repository.');
+        }
+    }
+
+    private function processIcons()
+    {
+        $variantDirectories = [
+            'regular' => 'core-main/assets/regular',
+            'bold' => 'core-main/assets/bold',
+            'duotone' => 'core-main/assets/duotone',
+            'fill' => 'core-main/assets/fill',
+            'light' => 'core-main/assets/light',
+            'thin' => 'core-main/assets/thin',
+        ];
+
+        $metadata = json_decode(Storage::get('icons/metadata.json'), true);
+
+        $this->info('Processing icons...');
+        $bar = $this->output->createProgressBar(count($metadata) * count($variantDirectories));
+        $bar->start();
+
+        $processedIcons = [];
+
+        foreach ($metadata as $iconData) {
+            $iconName = $iconData['name'];
+            $tags = $iconData['tags'];
+
+            $icon = Icon::firstOrCreate([
+                'name' => $iconName,
+                'keywords' => json_encode($tags),
+            ]);
+
+            foreach ($variantDirectories as $variantType => $directory) {
+                $filename = $variantType === 'regular' ? "{$iconName}.svg" : "{$iconName}-{$variantType}.svg";
+                $sourcePath = storage_path("app/icons/temp/{$directory}/{$filename}");
+
+                if (file_exists($sourcePath)) {
+                    $this->processIconVariant($icon, $filename, $sourcePath, $variantType);
+                }
+
+                $bar->advance();
+            }
+
+            if (!in_array($icon->id, $processedIcons)) {
+                GenerateIconEmbedding::dispatch($icon);
+                $processedIcons[] = $icon->id;
+            }
+        }
+
+        $bar->finish();
+        $this->newLine();
+    }
+
+    private function processIconVariant($icon, $filename, $sourcePath, $variantType)
+    {
+        $destinationPath = "icons/{$variantType}/{$filename}";
+
+        $svgContent = file_get_contents($sourcePath);
+        $processedSvg = $this->processSvg($svgContent);
+
+        $variant = $icon->variants()->firstOrCreate(
+            ['type' => $variantType],
+            ['file_path' => $destinationPath]
+        );
+
+        if (!$this->iconNeedsProcessing($variant, $processedSvg, $destinationPath)) {
             return;
         }
 
-        $jsonContent = $this->convertTypescriptToJson($metadata);
-        if ($jsonContent !== null) {
-            Storage::put('icons/metadata.json', $jsonContent);
-            $this->info('Successfully created metadata.json file.');
-        } else {
-            $this->error('Failed to create metadata.json file.');
+        Storage::put($destinationPath, $processedSvg);
+
+        $variant->update(['file_path' => $destinationPath]);
+    }
+
+    private function processSvg($svgContent)
+    {
+        return preg_replace('/fill="[^"]+"/', 'fill="currentColor"', $svgContent);
+    }
+
+    private function iconNeedsProcessing($variant, $processedSvg, $destinationPath)
+    {
+        if (!$variant->file_path || !Storage::exists($variant->file_path)) {
+            return true;
         }
+
+        $sourceHash = md5($processedSvg);
+        $destinationHash = md5(Storage::get($destinationPath));
+
+        return $sourceHash !== $destinationHash;
+    }
+
+    private function cleanup()
+    {
+        $this->info('Cleaning up temporary files...');
+        Storage::deleteDirectory('icons/temp');
+        Storage::delete('icons/repo.zip');
     }
 
     private function convertTypescriptToJson($typescriptContent)
@@ -189,7 +188,7 @@ class FetchAndProcessIcons extends Command
         foreach ($iconObjects as $index => $iconObject) {
             // Add opening brace if it's not the first object
             if ($index !== 0) {
-                $iconObject = '{'.$iconObject;
+                $iconObject = '{' . $iconObject;
             }
             // Add closing brace if it's not the last object
             if ($index !== count($iconObjects) - 1) {
