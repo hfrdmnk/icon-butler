@@ -4,10 +4,8 @@ namespace App\Console\Commands;
 
 use App\Jobs\GenerateIconEmbedding;
 use App\Models\Icon;
-use App\Models\Variant;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use ZipArchive;
 
@@ -66,7 +64,7 @@ class FetchAndProcessIcons extends Command
 
         $this->info('Extracting repository...');
         $zip = new ZipArchive;
-        if ($zip->open($zipPath) === TRUE) {
+        if ($zip->open($zipPath) === true) {
             $zip->extractTo($extractPath);
             $zip->close();
             $this->info('Repository extracted successfully.');
@@ -114,7 +112,7 @@ class FetchAndProcessIcons extends Command
                 $bar->advance();
             }
 
-            if (!in_array($icon->id, $processedIcons)) {
+            if (! in_array($icon->id, $processedIcons)) {
                 GenerateIconEmbedding::dispatch($icon);
                 $processedIcons[] = $icon->id;
             }
@@ -136,7 +134,7 @@ class FetchAndProcessIcons extends Command
             ['file_path' => $destinationPath]
         );
 
-        if (!$this->iconNeedsProcessing($variant, $processedSvg, $destinationPath)) {
+        if (! $this->iconNeedsProcessing($variant, $processedSvg, $destinationPath)) {
             return;
         }
 
@@ -152,7 +150,7 @@ class FetchAndProcessIcons extends Command
 
     private function iconNeedsProcessing($variant, $processedSvg, $destinationPath)
     {
-        if (!$variant->file_path || !Storage::exists($variant->file_path)) {
+        if (! $variant->file_path || ! Storage::exists($variant->file_path)) {
             return true;
         }
 
@@ -188,7 +186,7 @@ class FetchAndProcessIcons extends Command
         foreach ($iconObjects as $index => $iconObject) {
             // Add opening brace if it's not the first object
             if ($index !== 0) {
-                $iconObject = '{' . $iconObject;
+                $iconObject = '{'.$iconObject;
             }
             // Add closing brace if it's not the last object
             if ($index !== count($iconObjects) - 1) {
