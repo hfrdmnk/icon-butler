@@ -52,7 +52,7 @@ new class extends Component {
     public function generateExplanation($iconName, $copy)
     {
         $response = OpenAI::chat()->create([
-            'model' => 'gpt-3.5-turbo',
+            'model' => 'gpt-4o-mini',
             'messages' => [
                 [
                     'role' => 'system',
@@ -60,7 +60,7 @@ new class extends Component {
                 ],
                 [
                     'role' => 'user',
-                    'content' => "Explain in one short paragraph why the '{$iconName}' icon might fit this copy: '{$copy}'",
+                    'content' => "Explain in one short scentence why the '{$iconName}' icon might fit this copy: '{$copy}'",
                 ],
             ],
         ]);
