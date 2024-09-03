@@ -145,6 +145,7 @@ class FetchAndProcessIcons extends Command
         $metadata = Storage::get('icons/metadata.ts');
         if ($metadata === null) {
             $this->error('Failed to read metadata.ts file.');
+
             return;
         }
         $jsonContent = $this->convertTypescriptToJson($metadata);
@@ -177,7 +178,7 @@ class FetchAndProcessIcons extends Command
         foreach ($iconObjects as $index => $iconObject) {
             // Add opening brace if it's not the first object
             if ($index !== 0) {
-                $iconObject = '{' . $iconObject;
+                $iconObject = '{'.$iconObject;
             }
             // Add closing brace if it's not the last object
             if ($index !== count($iconObjects) - 1) {
@@ -188,7 +189,7 @@ class FetchAndProcessIcons extends Command
             preg_match('/name: "(.*?)"/', $iconObject, $nameMatch);
             preg_match('/tags: \[([\s\S]*?)\]/', $iconObject, $tagsMatch);
 
-            if (!empty($nameMatch[1]) && !empty($tagsMatch[1])) {
+            if (! empty($nameMatch[1]) && ! empty($tagsMatch[1])) {
                 $name = $nameMatch[1];
                 $tags = preg_split('/,\s*/', $tagsMatch[1]);
                 $tags = array_map(function ($tag) {
@@ -197,7 +198,7 @@ class FetchAndProcessIcons extends Command
 
                 $transformedIcons[] = [
                     'name' => $name,
-                    'tags' => array_values(array_filter($tags)) // Remove empty elements
+                    'tags' => array_values(array_filter($tags)), // Remove empty elements
                 ];
             }
         }
@@ -207,10 +208,11 @@ class FetchAndProcessIcons extends Command
         $json = json_decode($json, true);
         foreach ($json as &$icon) {
             $icon['tags'] = array_values(array_filter($icon['tags'], function ($tag) {
-                return !str_starts_with($tag, '*') && !str_ends_with($tag, '*');
+                return ! str_starts_with($tag, '*') && ! str_ends_with($tag, '*');
             }));
         }
         $json = json_encode($json, JSON_PRETTY_PRINT);
+
         return $json;
     }
 }
