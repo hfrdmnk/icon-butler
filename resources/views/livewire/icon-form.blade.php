@@ -131,11 +131,7 @@ new class extends Component {
                                     <option value="{{ $variant->type }}">{{ ucfirst($variant->type) }}</option>
                                 @endforeach
                             </select>
-                            <x-mary-button
-                                label="Copy SVG"
-                                size="sm"
-                                wire:click="copyToClipboard({{ $icon->id }}, '{{ $selectedVariant[$icon->id] }}')"
-                            />
+                            <x-mary-button label="Copy SVG" size="sm" wire:click="alert('SVG copied to clipboard!')" />
                         </div>
                     </div>
                     <p class="text-sm">{{ $explanations[$icon->id] }}</p>
@@ -144,13 +140,3 @@ new class extends Component {
         </div>
     @endif
 </div>
-
-<script>
-    document.addEventListener('livewire:initialized', () => {
-        @this.on('copyToClipboard', (event) => {
-            navigator.clipboard.writeText(event.svg).then(() => {
-                alert('SVG copied to clipboard!');
-            });
-        });
-    });
-</script>
