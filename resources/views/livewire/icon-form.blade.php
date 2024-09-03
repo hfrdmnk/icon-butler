@@ -9,6 +9,7 @@ new class extends Component {
     public $suggestedIcons = [];
     public $explanations = [];
     public $selectedVariant = [];
+    public $excludeUnmentionedLogos = true;
 
     public function save()
     {
@@ -28,8 +29,17 @@ new class extends Component {
             ->with('variants')
             ->get();
 
+        // Filter icons based on name and explicit mention in copy
+        $filteredIcons = $icons->filter(function ($icon) {
+            if (str_contains(strtolower($icon->name), 'logo') && $this->excludeUnmentionedLogos) {
+                $companyName = str_replace('-logo', '', strtolower($icon->name));
+                return str_contains(strtolower($this->copy), $companyName);
+            }
+            return true;
+        });
+
         // Calculate cosine similarity and sort
-        $iconSimilarities = $icons
+        $iconSimilarities = $filteredIcons
             ->map(function ($icon) use ($copyEmbedding) {
                 $iconEmbedding = json_decode($icon->embedding);
                 $similarity = $this->cosineSimilarity($copyEmbedding, $iconEmbedding);
@@ -96,16 +106,26 @@ new class extends Component {
 
 <div>
     <x-mary-form wire:submit="save">
-        <x-mary-textarea
-            label="Your Copy"
-            wire:model="copy"
-            hint="Paste your copy in here"
-            placeholder="Lorem Ipsum…"
-            rows="10"
-        />
+        <div class="flex flex-col gap-4">
+            <x-mary-textarea
+                label="Your Copy"
+                wire:model="copy"
+                hint="Paste your copy in here"
+                placeholder="Lorem Ipsum…"
+                rows="8"
+            />
+            <x-mary-checkbox
+                label="Exclude company logos not explicitly mentioned"
+                wire:model="excludeUnmentionedLogos"
+                hint="This usually results in a more accurate match."
+            />
+        </div>
 
         <x-slot:actions>
-            <x-mary-button label="Suggest Icons" class="btn-primary" type="submit" spinner="save" />
+            <x-mary-button class="btn-primary" type="submit" spinner="save">
+                <span wire:loading.remove>Suggest Icons</span>
+                <span wire:loading>Looking for the perfect match</span>
+            </x-mary-button>
         </x-slot>
     </x-mary-form>
 
