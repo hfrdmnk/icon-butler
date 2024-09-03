@@ -3,8 +3,7 @@
 use Livewire\Volt\Component;
 use OpenAI\Laravel\Facades\OpenAI;
 
-new class extends Component
-{
+new class extends Component {
     public $copy;
     public $response;
 
