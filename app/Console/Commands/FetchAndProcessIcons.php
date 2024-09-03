@@ -170,7 +170,7 @@ class FetchAndProcessIcons extends Command
         foreach ($iconObjects as $index => $iconObject) {
             // Add opening brace if it's not the first object
             if ($index !== 0) {
-                $iconObject = '{' . $iconObject;
+                $iconObject = '{'.$iconObject;
             }
             // Add closing brace if it's not the last object
             if ($index !== count($iconObjects) - 1) {
