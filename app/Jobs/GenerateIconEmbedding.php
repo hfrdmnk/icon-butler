@@ -25,7 +25,7 @@ class GenerateIconEmbedding implements ShouldQueue
     {
         $response = OpenAI::embeddings()->create([
             'model' => 'text-embedding-3-small',
-            'input' => $this->icon->name,
+            'input' => $this->icon->name.' '.($this->icon->keywords ? implode(' ', json_decode($this->icon->keywords, true)) : ''),
         ]);
 
         $embedding = $response->embeddings[0]->embedding;

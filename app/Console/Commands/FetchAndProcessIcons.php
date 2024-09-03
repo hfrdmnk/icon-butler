@@ -143,6 +143,7 @@ class FetchAndProcessIcons extends Command
         );
 
         // Dispatch job to generate embedding
+        // TODO: Only dispatch if the icon is not already embedded or has changed
         GenerateIconEmbedding::dispatch($icon);
     }
 
