@@ -72,8 +72,7 @@ new class extends Component {
     {
         $icon = $this->suggestedIcons->firstWhere('id', $iconId);
         $variant = $icon->variants->firstWhere('type', $variantType);
-        $svgContent = file_get_contents(storage_path('app/' . $variant->file_path));
-        $this->dispatch('copyToClipboard', svg: $svgContent);
+        $this->dispatch('alert', message: 'Icon path: ' . $variant->file_path);
     }
 
     private function cosineSimilarity($a, $b)
@@ -131,7 +130,11 @@ new class extends Component {
                                     <option value="{{ $variant->type }}">{{ ucfirst($variant->type) }}</option>
                                 @endforeach
                             </select>
-                            <x-mary-button label="Copy SVG" size="sm" wire:click="alert('SVG copied to clipboard!')" />
+                            <x-mary-button
+                                label="Copy SVG"
+                                size="sm"
+                                wire:click="copyToClipboard({{ $icon->id }}, '{{ $selectedVariant[$icon->id] }}')"
+                            />
                         </div>
                     </div>
                     <p class="text-sm">{{ $explanations[$icon->id] }}</p>
@@ -140,3 +143,13 @@ new class extends Component {
         </div>
     @endif
 </div>
+
+@script
+    <script>
+        document.addEventListener('livewire:initialized', () => {
+            Livewire.on('alert', ({ message }) => {
+                alert(message);
+            });
+        });
+    </script>
+@endscript
