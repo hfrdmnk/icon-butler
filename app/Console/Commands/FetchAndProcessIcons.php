@@ -21,7 +21,7 @@ class FetchAndProcessIcons extends Command
     public function handle()
     {
         $iconMetadataFileURL = 'https://raw.githubusercontent.com/phosphor-icons/core/main/src/icons.ts';
-        $this->saveIconMetadataFile($iconMetadataFileURL);
+        $this->createJsonFileFromMetadata($iconMetadataFileURL);
 
         if ($this->option('json-only')) {
             return;
@@ -130,30 +130,22 @@ class FetchAndProcessIcons extends Command
         GenerateIconEmbedding::dispatch($icon);
     }
 
-    private function saveIconMetadataFile($url)
+    private function createJsonFileFromMetadata($url)
     {
         $response = Http::get($url);
         if ($response->successful()) {
             $content = $response->body();
-            Storage::put('icons/metadata.ts', $content);
-            $this->createJsonFileFromMetadata();
-        }
-    }
-
-    private function createJsonFileFromMetadata()
-    {
-        $metadata = Storage::get('icons/metadata.ts');
-        if ($metadata === null) {
-            $this->error('Failed to read metadata.ts file.');
+            $metadata = $content;
+        } else {
+            $this->error('Failed to read get metadata file from repo.');
 
             return;
         }
+
         $jsonContent = $this->convertTypescriptToJson($metadata);
         if ($jsonContent !== null) {
             Storage::put('icons/metadata.json', $jsonContent);
             $this->info('Successfully created metadata.json file.');
-            Storage::delete('icons/metadata.ts');
-            $this->info('Successfully deleted metadata.ts file.');
         } else {
             $this->error('Failed to create metadata.json file.');
         }
@@ -178,7 +170,7 @@ class FetchAndProcessIcons extends Command
         foreach ($iconObjects as $index => $iconObject) {
             // Add opening brace if it's not the first object
             if ($index !== 0) {
-                $iconObject = '{'.$iconObject;
+                $iconObject = '{' . $iconObject;
             }
             // Add closing brace if it's not the last object
             if ($index !== count($iconObjects) - 1) {
