@@ -8,6 +8,7 @@ use App\Models\Variant;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class FetchAndProcessIcons extends Command
 {
@@ -42,7 +43,13 @@ class FetchAndProcessIcons extends Command
             $this->info('1. Ensure your queue worker is running: php artisan queue:work');
             $this->info('2. Or, to process all queued jobs once: php artisan queue:work --stop-when-empty');
         } else {
-            $this->error('Failed to fetch icons from the repository.');
+            $statusCode = $response->status();
+            $errorBody = $response->body();
+            $this->error("Failed to fetch icons from the repository. Status code: $statusCode");
+            $this->error("Error message: $errorBody");
+
+            // Optionally, log the error for future reference
+            Log::error("GitHub API Error: Status $statusCode, Body: $errorBody");
         }
     }
 
