@@ -110,6 +110,19 @@ class FetchAndProcessIcons extends Command
             ? $fullIconName
             : preg_replace("/-$variantType$/", '', $fullIconName);
 
+        $metadata = Storage::get('icons/metadata.json');
+        $metadata = json_decode($metadata, true);
+        $tags = [];
+        foreach ($metadata as $item) {
+            if ($item['name'] === $iconName) {
+                $tags = $item['tags'];
+                break;
+            }
+        }
+        if (empty($tags)) {
+            $this->warn("No tags found for icon: $iconName");
+        }
+
         $svgContent = Http::get($url)->body();
 
         // Replace fill colors with currentColor
@@ -120,7 +133,10 @@ class FetchAndProcessIcons extends Command
         Storage::put($filePath, $processedSvg);
 
         // Save to database
-        $icon = Icon::firstOrCreate(['name' => $iconName]);
+        $icon = Icon::firstOrCreate([
+            'name' => $iconName,
+            'keywords' => json_encode($tags),
+        ]);
         $icon->variants()->updateOrCreate(
             ['type' => $variantType],
             ['file_path' => $filePath]

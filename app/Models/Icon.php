@@ -9,7 +9,7 @@ class Icon extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'embedding'];
+    protected $fillable = ['name', 'keywords', 'embedding'];
 
     public function variants()
     {
