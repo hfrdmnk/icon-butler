@@ -18,7 +18,7 @@ new class extends Component {
 
         // Generate embedding for user's copy
         $response = OpenAI::embeddings()->create([
-            'model' => 'text-embedding-ada-002',
+            'model' => 'text-embedding-3-small',
             'input' => $this->copy,
         ]);
         $copyEmbedding = $response->embeddings[0]->embedding;
