@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Contracts\IconRepositoryInterface;
+use App\Repositories\PhosphorIconRepository;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -11,7 +13,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind('icon.repository', function ($app) {
+            return new PhosphorIconRepository;
+        });
+
+        $this->app->bind(IconRepositoryInterface::class, PhosphorIconRepository::class);
     }
 
     /**
