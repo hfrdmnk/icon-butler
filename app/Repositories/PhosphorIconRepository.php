@@ -11,6 +11,8 @@ use ZipArchive;
 
 class PhosphorIconRepository implements IconRepositoryInterface
 {
+    private const ICON_SET_NAME = 'phosphor';
+
     private const METADATA_URL = 'https://raw.githubusercontent.com/phosphor-icons/core/main/src/icons.ts';
 
     private const REPO_ZIP_URL = 'https://github.com/phosphor-icons/core/archive/refs/heads/main.zip';
@@ -35,8 +37,8 @@ class PhosphorIconRepository implements IconRepositoryInterface
 
     public function downloadAndExtractRepo(): void
     {
-        $zipPath = storage_path('app/temp_icons/repo.zip');
-        $extractPath = storage_path('app/temp_icons/temp');
+        $zipPath = storage_path('app/temp_icons/'.self::ICON_SET_NAME.'/repo.zip');
+        $extractPath = storage_path('app/temp_icons/'.self::ICON_SET_NAME.'/temp');
 
         file_put_contents($zipPath, file_get_contents(self::REPO_ZIP_URL));
 
@@ -70,7 +72,7 @@ class PhosphorIconRepository implements IconRepositoryInterface
 
         foreach ($this->getIconVariants() as $variantType => $directory) {
             $filename = $variantType === 'regular' ? "{$iconData['name']}.svg" : "{$iconData['name']}-{$variantType}.svg";
-            $sourcePath = storage_path("app/temp_icons/temp/{$directory}/{$filename}");
+            $sourcePath = storage_path('app/temp_icons/'.self::ICON_SET_NAME."/temp/{$directory}/{$filename}");
 
             if (file_exists($sourcePath)) {
                 $this->processIconVariant($icon, $filename, $sourcePath, $variantType);
@@ -84,23 +86,23 @@ class PhosphorIconRepository implements IconRepositoryInterface
 
     private function processIconVariant(Icon $icon, string $filename, string $sourcePath, string $variantType): void
     {
-        $destinationPath = "public/icons/{$variantType}/{$filename}";
+        $destinationPath = 'icons/'.self::ICON_SET_NAME."/{$variantType}/{$filename}";
 
         $svgContent = file_get_contents($sourcePath);
         $processedSvg = $this->processSvg($svgContent);
 
         $variant = $icon->variants()->firstOrCreate(
             ['type' => $variantType],
-            ['file_path' => $destinationPath]
+            ['file_path' => "storage/{$destinationPath}"]
         );
 
         if (! $this->iconNeedsProcessing($variant, $processedSvg, $destinationPath)) {
             return;
         }
 
-        Storage::put($destinationPath, $processedSvg);
+        Storage::put("public/{$destinationPath}", $processedSvg);
 
-        $variant->update(['file_path' => $destinationPath]);
+        $variant->update(['file_path' => "storage/{$destinationPath}"]);
     }
 
     private function processSvg(string $svgContent): string
@@ -122,7 +124,7 @@ class PhosphorIconRepository implements IconRepositoryInterface
 
     public function cleanup(): void
     {
-        Storage::deleteDirectory('temp_icons');
+        Storage::deleteDirectory('temp_icons/'.self::ICON_SET_NAME);
     }
 
     // ... (keep other private methods like processIconVariant, processSvg, etc.)

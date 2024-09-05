@@ -34,13 +34,13 @@ class FetchAndProcessIcons extends Command
     private function createJsonFileFromMetadata()
     {
         $metadata = IconRepository::fetchMetadata();
-        Storage::put('temp_icons/metadata.json', json_encode($metadata, JSON_PRETTY_PRINT));
+        Storage::put('temp_icons/phosphor/metadata.json', json_encode($metadata, JSON_PRETTY_PRINT));
         $this->info('Successfully created metadata.json file.');
     }
 
     private function processIcons()
     {
-        $metadata = json_decode(Storage::get('temp_icons/metadata.json'), true);
+        $metadata = json_decode(Storage::get('temp_icons/phosphor/metadata.json'), true);
 
         $this->info('Processing icons...');
         $bar = $this->output->createProgressBar(count($metadata));
