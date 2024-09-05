@@ -22,6 +22,11 @@ export default {
             colors: {
                 'base-content-muted': 'oklch(var(--base-content-muted) / <alpha-value>)',
             },
+            borderWidth: {
+                3: '3px',
+                5: '5px',
+                6: '6px',
+            },
         },
     },
 
