@@ -7,6 +7,8 @@
 
         <title>{{ config('app.name', 'Laravel') }}</title>
 
+        <!-- Styles -->
+        @livewireStyles
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
@@ -26,5 +28,7 @@
                 {{ $slot }}
             </div>
         </div>
+        <!-- Scripts -->
+        @livewireScriptConfig
     </body>
 </html>

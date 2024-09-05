@@ -112,7 +112,8 @@ new class extends Component {
                 wire:model="copy"
                 hint="Paste your copy in here"
                 placeholder="Lorem Ipsum…"
-                rows="8"
+                x-data
+                x-autosize
             />
             <x-mary-checkbox
                 label="Exclude company logos not explicitly mentioned"
