@@ -137,55 +137,18 @@ new class extends Component {
     @if (count($suggestedIcons) > 0)
         <div class="mt-4">
             <h3 class="mb-4 text-xl font-semibold">Suggested Icons:</h3>
-            <div class="grid grid-cols-4 gap-4">
+
+            <div class="grid grid-cols-2 gap-4">
                 @foreach ($suggestedIcons as $icon)
                     <div class="flex flex-col gap-2 rounded border border-base-300 p-4">
                         <div class="flex items-center">
                             <div class="mr-2 h-8 w-8">
-                                <img src="{{ asset('storage/' . $iconPaths[$icon->id]) }}" alt="{{ $icon->name }}" />
+                                <img src="{{ asset($iconPaths[$icon->id]) }}" alt="{{ $icon->name }}" />
                             </div>
                             <h4 class="text-sm font-medium">{{ $icon->name }}</h4>
                         </div>
                         <div class="text-sm text-base-content-muted">
                             {{ $explanations[$icon->id] }}
-                        </div>
-                        <div class="mt-2 flex flex-wrap gap-2">
-                            <x-mary-button
-                                class="btn-ghost btn-sm p-1"
-                                wire:click="changeVariant('bold', {{ $icon->id }})"
-                            >
-                                <div class="h-6 w-6 rounded-full border-4 border-current"></div>
-                            </x-mary-button>
-                            <x-mary-button
-                                class="btn-ghost btn-sm p-1"
-                                wire:click="changeVariant('duotone', {{ $icon->id }})"
-                            >
-                                <div class="h-6 w-6 rounded-full bg-current opacity-50"></div>
-                            </x-mary-button>
-                            <x-mary-button
-                                class="btn-ghost btn-sm p-1"
-                                wire:click="changeVariant('fill', {{ $icon->id }})"
-                            >
-                                <div class="h-6 w-6 rounded-full bg-current"></div>
-                            </x-mary-button>
-                            <x-mary-button
-                                class="btn-ghost btn-sm p-1"
-                                wire:click="changeVariant('light', {{ $icon->id }})"
-                            >
-                                <div class="h-6 w-6 rounded-full border border-current"></div>
-                            </x-mary-button>
-                            <x-mary-button
-                                class="btn-ghost btn-sm p-1"
-                                wire:click="changeVariant('regular', {{ $icon->id }})"
-                            >
-                                <div class="h-6 w-6 rounded-full border-2 border-current"></div>
-                            </x-mary-button>
-                            <x-mary-button
-                                class="btn-ghost btn-sm p-1"
-                                wire:click="changeVariant('thin', {{ $icon->id }})"
-                            >
-                                <div class="h-6 w-6 rounded-full border border-current opacity-50"></div>
-                            </x-mary-button>
                         </div>
                     </div>
                 @endforeach
