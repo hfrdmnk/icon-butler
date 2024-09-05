@@ -12,7 +12,6 @@ new class extends Component {
     public $iconsData = [];
     public $explanations = [];
     public $availableTypes = [];
-    public $selectedType = 'regular';
     public $excludeUnmentionedLogos = true;
 
     public function mount()
@@ -156,7 +155,14 @@ new class extends Component {
     </x-mary-form>
 
     @if (count($suggestedIcons) > 0)
-        <div class="mt-4 flex flex-col gap-4">
+        <div
+            class="mt-4 flex flex-col gap-4"
+            x-data="{
+                selectedType: 'regular',
+                iconsData: {},
+            }"
+            x-init="iconsData = $wire.iconsData"
+        >
             <h3 class="text-xl font-semibold">Suggested Icons:</h3>
 
             <div class="flex flex-col gap-2">
@@ -169,21 +175,21 @@ new class extends Component {
                                 name="type"
                                 id="{{ $type['id'] }}"
                                 value="{{ $type['id'] }}"
-                                wire:model.live="selectedType"
+                                x-model="selectedType"
                                 class="sr-only"
                             />
                             <label for="{{ $type['id'] }}" class="block cursor-pointer">
                                 <div
-                                    @class([
-                                        'h-6 w-6 rounded-full border-neutral',
-                                        'ring' => $selectedType === $type['id'],
-                                        'border-3' => $type['id'] === 'regular',
-                                        'border-5' => $type['id'] === 'bold',
-                                        'border-3 bg-base-300' => $type['id'] === 'duotone',
-                                        'border-3 bg-neutral' => $type['id'] === 'fill',
-                                        'border-2' => $type['id'] === 'light',
-                                        'border' => $type['id'] === 'thin',
-                                    ])
+                                    :class="{
+                                        'h-6 w-6 rounded-full border-neutral': true,
+                                        'ring': selectedType === '{{ $type['id'] }}',
+                                        'border-3': '{{ $type['id'] }}' === 'regular',
+                                        'border-5': '{{ $type['id'] }}' === 'bold',
+                                        'border-3 bg-base-300': '{{ $type['id'] }}' === 'duotone',
+                                        'border-3 bg-neutral': '{{ $type['id'] }}' === 'fill',
+                                        'border-2': '{{ $type['id'] }}' === 'light',
+                                        'border': '{{ $type['id'] }}' === 'thin'
+                                    }"
                                 ></div>
                             </label>
                         </div>
@@ -191,15 +197,18 @@ new class extends Component {
                 </div>
             </div>
 
-            <div class="mt-4 grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-4">
                 @foreach ($suggestedIcons as $icon)
                     <div class="flex flex-col gap-2 rounded border border-base-300 p-4">
                         <div class="flex items-center">
                             <div class="mr-2 h-8 w-8">
-                                <img
-                                    src="{{ asset($iconsData[$icon->id][$selectedType]['file_path']) }}"
-                                    alt="{{ $icon->name }}"
-                                />
+                                <template x-for="(variant, type) in {{ json_encode($iconsData[$icon->id]) }}">
+                                    <img
+                                        :src="type === selectedType ? variant.file_path : ''"
+                                        :alt="{{ json_encode($icon->name) }}"
+                                        x-show="type === selectedType"
+                                    />
+                                </template>
                             </div>
                             <h4 class="text-sm font-medium">{{ $icon->name }}</h4>
                         </div>
@@ -209,8 +218,8 @@ new class extends Component {
                         <div class="mt-4">
                             <x-mary-button
                                 icon="o-clipboard"
-                                class="text-sm"
-                                data-svg="{{ $iconsData[$icon->id][$selectedType]['svg_content'] }}"
+                                x-on:click="navigator.clipboard.writeText($el.dataset.svg); alert('SVG copied to clipboard!')"
+                                x-bind:data-svg="iconsData[{{ $icon->id }}][selectedType].svg_content"
                             >
                                 Copy SVG
                             </x-mary-button>
