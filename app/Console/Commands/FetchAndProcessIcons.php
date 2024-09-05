@@ -5,25 +5,22 @@ namespace App\Console\Commands;
 use App\Facades\IconRepository;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Storage;
 
 class FetchAndProcessIcons extends Command
 {
-    protected $signature = 'icons:fetch-and-process {--all : Process all icons} {--json-only : Only fetch and save JSON without processing icons}';
+    protected $signature = 'icons:fetch-and-process {--all : Process all icons}';
 
     protected $description = 'Fetch and process icons from the configured icon repository';
 
     public function handle()
     {
-        $this->createJsonFileFromMetadata();
+        $this->info('Fetching and processing icons...');
 
-        if ($this->option('json-only')) {
-            return;
-        }
-
+        IconRepository::fetchAndSaveMetadata();
         IconRepository::downloadAndExtractRepo();
 
-        $this->processIcons();
+        $processAll = $this->option('all') || App::environment('production');
+        $this->processIcons($processAll);
 
         IconRepository::cleanup();
 
@@ -31,29 +28,15 @@ class FetchAndProcessIcons extends Command
         $this->info('Temporary data has been cleaned up.');
     }
 
-    private function createJsonFileFromMetadata()
+    private function processIcons(bool $processAll)
     {
-        $metadata = IconRepository::fetchMetadata();
-        Storage::put('temp_icons/phosphor/metadata.json', json_encode($metadata, JSON_PRETTY_PRINT));
-        $this->info('Successfully created metadata.json file.');
-    }
-
-    private function processIcons()
-    {
-        $metadata = json_decode(Storage::get('temp_icons/phosphor/metadata.json'), true);
-
-        $this->info('Processing icons...');
-        $bar = $this->output->createProgressBar(count($metadata));
+        $totalIcons = IconRepository::getTotalIconCount();
+        $bar = $this->output->createProgressBar($totalIcons);
         $bar->start();
 
-        $processAll = $this->option('all') || App::environment('production');
-
-        foreach ($metadata as $index => $iconData) {
-            if ($processAll || $index % 10 === 0) {
-                IconRepository::processIcon($iconData);
-            }
+        IconRepository::processIcons($processAll, function () use ($bar) {
             $bar->advance();
-        }
+        });
 
         $bar->finish();
         $this->newLine();

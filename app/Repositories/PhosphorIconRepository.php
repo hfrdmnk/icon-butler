@@ -127,7 +127,40 @@ class PhosphorIconRepository implements IconRepositoryInterface
         Storage::deleteDirectory('temp_icons/'.self::ICON_SET_NAME);
     }
 
-    // ... (keep other private methods like processIconVariant, processSvg, etc.)
+    public function fetchAndSaveMetadata(): void
+    {
+        $metadata = $this->fetchMetadata();
+        Storage::put('temp_icons/'.self::ICON_SET_NAME.'/metadata.json', json_encode($metadata, JSON_PRETTY_PRINT));
+    }
+
+    public function getTotalIconCount(): int
+    {
+        $metadata = $this->getMetadata();
+
+        return count($metadata);
+    }
+
+    public function processIcons(bool $processAll, callable $progressCallback): void
+    {
+        $metadata = $this->getMetadata();
+
+        foreach ($metadata as $index => $iconData) {
+            if ($processAll || $index % 10 === 0) {
+                $this->processIcon($iconData);
+            }
+            $progressCallback();
+        }
+    }
+
+    private function getMetadata(): array
+    {
+        $metadataPath = 'temp_icons/'.self::ICON_SET_NAME.'/metadata.json';
+        if (! Storage::exists($metadataPath)) {
+            throw new \Exception('Metadata file not found. Please run fetchAndSaveMetadata first.');
+        }
+
+        return json_decode(Storage::get($metadataPath), true);
+    }
 
     private function convertTypescriptToJson($typescriptContent): array
     {
