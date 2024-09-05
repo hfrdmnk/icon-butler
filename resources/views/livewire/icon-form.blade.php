@@ -7,8 +7,9 @@ use App\Models\Icon;
 new class extends Component {
     public $copy;
     public $suggestedIcons = [];
+    public $iconPaths = [];
     public $explanations = [];
-    public $selectedVariant = [];
+    public $selectedVariant = 'regular';
     public $excludeUnmentionedLogos = true;
 
     public function save()
@@ -48,14 +49,16 @@ new class extends Component {
             ->sortByDesc('similarity');
 
         // Get top 3 matches
-        $this->suggestedIcons = $iconSimilarities->take(3)->map(function ($item) {
+        $this->suggestedIcons = $iconSimilarities->take(4)->map(function ($item) {
             return $item['icon'];
         });
 
         // Generate explanations
         foreach ($this->suggestedIcons as $icon) {
             $this->explanations[$icon->id] = $this->generateExplanation($icon->name, $this->copy);
-            $this->selectedVariant[$icon->id] = $icon->variants->first()->type;
+            $this->iconPaths[$icon->id] = $this->suggestedIcons
+                ->firstWhere('id', $icon->id)
+                ->variants->firstWhere('type', $icon->selectedVariant ?? 'regular')->file_path;
         }
     }
 
@@ -78,13 +81,6 @@ new class extends Component {
         return $response->choices[0]->message->content;
     }
 
-    public function copyToClipboard($iconId, $variantType)
-    {
-        $icon = $this->suggestedIcons->firstWhere('id', $iconId);
-        $variant = $icon->variants->firstWhere('type', $variantType);
-        $this->dispatch('alert', message: 'Icon path: ' . $variant->file_path);
-    }
-
     private function cosineSimilarity($a, $b)
     {
         $dotProduct = 0;
@@ -101,6 +97,14 @@ new class extends Component {
         $magnitudeB = sqrt($magnitudeB);
 
         return $dotProduct / ($magnitudeA * $magnitudeB);
+    }
+
+    public function changeVariant($variant, $iconId)
+    {
+        $icon = $this->suggestedIcons->firstWhere('id', $iconId);
+        if ($icon) {
+            $icon->selectedVariant = $variant;
+        }
     }
 }; ?>
 
@@ -133,44 +137,59 @@ new class extends Component {
     @if (count($suggestedIcons) > 0)
         <div class="mt-4">
             <h3 class="mb-4 text-xl font-semibold">Suggested Icons:</h3>
-            @foreach ($suggestedIcons as $icon)
-                <div class="mb-6 rounded-lg border p-4">
-                    <h4 class="mb-2 text-lg font-semibold">{{ $icon->name }}</h4>
-                    <div class="mb-4 flex items-center">
-                        <div class="mr-4 h-16 w-16">
-                            @php
-                                $variant = $icon->variants->firstWhere('type', $selectedVariant[$icon->id]);
-                                $svgContent = file_get_contents(storage_path('app/' . $variant->file_path));
-                            @endphp
-
-                            {!! $svgContent !!}
+            <div class="grid grid-cols-4 gap-4">
+                @foreach ($suggestedIcons as $icon)
+                    <div class="flex flex-col gap-2 rounded border border-base-300 p-4">
+                        <div class="flex items-center">
+                            <div class="mr-2 h-8 w-8">
+                                <img src="{{ asset('storage/' . $iconPaths[$icon->id]) }}" alt="{{ $icon->name }}" />
+                            </div>
+                            <h4 class="text-sm font-medium">{{ $icon->name }}</h4>
                         </div>
-                        <div>
-                            <select wire:model="selectedVariant.{{ $icon->id }}" class="mb-2">
-                                @foreach ($icon->variants as $variant)
-                                    <option value="{{ $variant->type }}">{{ ucfirst($variant->type) }}</option>
-                                @endforeach
-                            </select>
+                        <div class="text-sm text-base-content-muted">
+                            {{ $explanations[$icon->id] }}
+                        </div>
+                        <div class="mt-2 flex flex-wrap gap-2">
                             <x-mary-button
-                                label="Copy SVG"
-                                size="sm"
-                                wire:click="copyToClipboard({{ $icon->id }}, '{{ $selectedVariant[$icon->id] }}')"
-                            />
+                                class="btn-ghost btn-sm p-1"
+                                wire:click="changeVariant('bold', {{ $icon->id }})"
+                            >
+                                <div class="h-6 w-6 rounded-full border-4 border-current"></div>
+                            </x-mary-button>
+                            <x-mary-button
+                                class="btn-ghost btn-sm p-1"
+                                wire:click="changeVariant('duotone', {{ $icon->id }})"
+                            >
+                                <div class="h-6 w-6 rounded-full bg-current opacity-50"></div>
+                            </x-mary-button>
+                            <x-mary-button
+                                class="btn-ghost btn-sm p-1"
+                                wire:click="changeVariant('fill', {{ $icon->id }})"
+                            >
+                                <div class="h-6 w-6 rounded-full bg-current"></div>
+                            </x-mary-button>
+                            <x-mary-button
+                                class="btn-ghost btn-sm p-1"
+                                wire:click="changeVariant('light', {{ $icon->id }})"
+                            >
+                                <div class="h-6 w-6 rounded-full border border-current"></div>
+                            </x-mary-button>
+                            <x-mary-button
+                                class="btn-ghost btn-sm p-1"
+                                wire:click="changeVariant('regular', {{ $icon->id }})"
+                            >
+                                <div class="h-6 w-6 rounded-full border-2 border-current"></div>
+                            </x-mary-button>
+                            <x-mary-button
+                                class="btn-ghost btn-sm p-1"
+                                wire:click="changeVariant('thin', {{ $icon->id }})"
+                            >
+                                <div class="h-6 w-6 rounded-full border border-current opacity-50"></div>
+                            </x-mary-button>
                         </div>
                     </div>
-                    <p class="text-sm">{{ $explanations[$icon->id] }}</p>
-                </div>
-            @endforeach
+                @endforeach
+            </div>
         </div>
     @endif
 </div>
-
-@script
-    <script>
-        document.addEventListener('livewire:initialized', () => {
-            Livewire.on('alert', ({ message }) => {
-                alert(message);
-            });
-        });
-    </script>
-@endscript
