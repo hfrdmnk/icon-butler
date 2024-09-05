@@ -28,18 +28,19 @@ class FetchAndProcessIcons extends Command
         IconRepository::cleanup();
 
         $this->info('Icons fetched and processed successfully.');
+        $this->info('Temporary data has been cleaned up.');
     }
 
     private function createJsonFileFromMetadata()
     {
         $metadata = IconRepository::fetchMetadata();
-        Storage::put('icons/metadata.json', json_encode($metadata, JSON_PRETTY_PRINT));
+        Storage::put('temp_icons/metadata.json', json_encode($metadata, JSON_PRETTY_PRINT));
         $this->info('Successfully created metadata.json file.');
     }
 
     private function processIcons()
     {
-        $metadata = json_decode(Storage::get('icons/metadata.json'), true);
+        $metadata = json_decode(Storage::get('temp_icons/metadata.json'), true);
 
         $this->info('Processing icons...');
         $bar = $this->output->createProgressBar(count($metadata));
