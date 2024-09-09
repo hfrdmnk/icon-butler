@@ -41,8 +41,10 @@ class IconController extends Controller
         $filteredIcons = $icons->filter(function ($icon) use ($copy, $excludeUnmentionedLogos) {
             if (str_contains(strtolower($icon->name), 'logo') && $excludeUnmentionedLogos) {
                 $companyName = str_replace('-logo', '', strtolower($icon->name));
+
                 return str_contains(strtolower($copy), $companyName);
             }
+
             return true;
         });
 
@@ -51,6 +53,7 @@ class IconController extends Controller
             ->map(function ($icon) use ($copyEmbedding) {
                 $iconEmbedding = json_decode($icon->embedding);
                 $similarity = $this->cosineSimilarity($copyEmbedding, $iconEmbedding);
+
                 return ['icon' => $icon, 'similarity' => $similarity];
             })
             ->sortByDesc('similarity');
@@ -78,14 +81,14 @@ class IconController extends Controller
 
         $availableTypes =
             IconVariant::select('type')
-            ->distinct()
-            ->pluck('type')
-            ->map(function ($type) {
-                return [
-                    'id' => $type,
-                    'name' => ucfirst($type),
-                ];
-            });
+                ->distinct()
+                ->pluck('type')
+                ->map(function ($type) {
+                    return [
+                        'id' => $type,
+                        'name' => ucfirst($type),
+                    ];
+                });
 
         return Inertia::render('Icons/Index', [
             'copy' => $copy,
