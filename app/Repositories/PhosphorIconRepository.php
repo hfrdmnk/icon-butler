@@ -37,8 +37,8 @@ class PhosphorIconRepository implements IconRepositoryInterface
 
     public function downloadAndExtractRepo(): void
     {
-        $zipPath = storage_path('app/temp_icons/' . self::ICON_SET_NAME . '/repo.zip');
-        $extractPath = storage_path('app/temp_icons/' . self::ICON_SET_NAME . '/temp');
+        $zipPath = storage_path('app/temp_icons/'.self::ICON_SET_NAME.'/repo.zip');
+        $extractPath = storage_path('app/temp_icons/'.self::ICON_SET_NAME.'/temp');
 
         file_put_contents($zipPath, file_get_contents(self::REPO_ZIP_URL));
 
@@ -72,7 +72,7 @@ class PhosphorIconRepository implements IconRepositoryInterface
 
         foreach ($this->getIconVariants() as $variantType => $directory) {
             $filename = $variantType === 'regular' ? "{$iconData['name']}.svg" : "{$iconData['name']}-{$variantType}.svg";
-            $sourcePath = storage_path('app/temp_icons/' . self::ICON_SET_NAME . "/temp/{$directory}/{$filename}");
+            $sourcePath = storage_path('app/temp_icons/'.self::ICON_SET_NAME."/temp/{$directory}/{$filename}");
 
             if (file_exists($sourcePath)) {
                 $this->processIconVariant($icon, $filename, $sourcePath, $variantType);
@@ -86,7 +86,7 @@ class PhosphorIconRepository implements IconRepositoryInterface
 
     private function processIconVariant(Icon $icon, string $filename, string $sourcePath, string $variantType): void
     {
-        $destinationPath = 'icons/' . self::ICON_SET_NAME . "/{$variantType}/{$filename}";
+        $destinationPath = 'icons/'.self::ICON_SET_NAME."/{$variantType}/{$filename}";
 
         $svgContent = file_get_contents($sourcePath);
         $processedSvg = $this->processSvg($svgContent);
@@ -124,13 +124,13 @@ class PhosphorIconRepository implements IconRepositoryInterface
 
     public function cleanup(): void
     {
-        Storage::deleteDirectory('temp_icons/' . self::ICON_SET_NAME);
+        Storage::deleteDirectory('temp_icons/'.self::ICON_SET_NAME);
     }
 
     public function fetchAndSaveMetadata(): void
     {
         $metadata = $this->fetchMetadata();
-        Storage::put('temp_icons/' . self::ICON_SET_NAME . '/metadata.json', json_encode($metadata, JSON_PRETTY_PRINT));
+        Storage::put('temp_icons/'.self::ICON_SET_NAME.'/metadata.json', json_encode($metadata, JSON_PRETTY_PRINT));
     }
 
     public function getTotalIconCount(): int
@@ -154,7 +154,7 @@ class PhosphorIconRepository implements IconRepositoryInterface
 
     private function getMetadata(): array
     {
-        $metadataPath = 'temp_icons/' . self::ICON_SET_NAME . '/metadata.json';
+        $metadataPath = 'temp_icons/'.self::ICON_SET_NAME.'/metadata.json';
         if (! Storage::exists($metadataPath)) {
             throw new \Exception('Metadata file not found. Please run fetchAndSaveMetadata first.');
         }
@@ -181,7 +181,7 @@ class PhosphorIconRepository implements IconRepositoryInterface
         foreach ($iconObjects as $index => $iconObject) {
             // Add opening brace if it's not the first object
             if ($index !== 0) {
-                $iconObject = '{' . $iconObject;
+                $iconObject = '{'.$iconObject;
             }
             // Add closing brace if it's not the last object
             if ($index !== count($iconObjects) - 1) {
