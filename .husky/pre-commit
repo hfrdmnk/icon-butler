@@ -1,0 +1,2 @@
+npm run format:pint
+npm run format:prettier
