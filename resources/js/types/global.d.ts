@@ -7,4 +7,10 @@ declare global {
     }
 
     var route: typeof ziggyRoute;
+
+    namespace NodeJS {
+        interface Global {
+            route: typeof ziggyRoute;
+        }
+    }
 }
