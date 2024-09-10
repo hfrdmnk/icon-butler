@@ -5,6 +5,7 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/Components/ui/accordion";
+import { badgeVariants } from "@/Components/ui/badge";
 import { Button } from "@/Components/ui/button";
 import {
     Card,
@@ -14,6 +15,13 @@ import {
     CardTitle,
 } from "@/Components/ui/card";
 import { Label } from "@/Components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/Components/ui/select";
 import { Separator } from "@/Components/ui/separator";
 import { Switch } from "@/Components/ui/switch";
 import { Textarea } from "@/Components/ui/textarea";
@@ -28,24 +36,34 @@ import { PageProps } from "@/types";
 import { Head, useForm } from "@inertiajs/react";
 import { ClipboardIcon } from "@radix-ui/react-icons";
 import { useEffect, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 import { toast } from "sonner";
 
 export default function Index({
     auth,
     suggestedIcons,
     availableTypes,
+    rateLimitError,
 }: PageProps<{
     suggestedIcons: Icon[];
-    availableTypes: { id: string; name: string }[];
+    availableTypes: IconType[];
+    rateLimitError?: string;
 }>) {
     const [selectedType, setSelectedType] = useState<null | string>(null);
+    useHotkeys("mod+enter", () => handleSubmit(new Event("submit")), {
+        enableOnFormTags: true,
+    });
+
+    if (rateLimitError) {
+        toast.error(rateLimitError);
+    }
 
     const { data, setData, post, processing, errors } = useForm({
         copy: "",
         excludeUnmentionedLogos: true,
     });
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent | Event) => {
         e.preventDefault();
         post(route("icons.suggest"));
     };
@@ -89,11 +107,49 @@ export default function Index({
                 <p className="text-2xl font-semibold tracking-tight scroll-m-20">
                     Always serving you the best icons.
                 </p>
+                <div className="mt-4">
+                    <a
+                        href="https://phosphoricons.com/"
+                        target="_blank"
+                        className={badgeVariants({ variant: "outline" })}
+                    >
+                        Powered by Phosphor Icons
+                    </a>
+                </div>
             </header>
             <main className="container max-w-3xl py-8">
                 <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-                    <div>
-                        <Label>Your copy</Label>
+                    <div className="flex flex-col gap-2">
+                        <div className="flex items-center justify-between h-9">
+                            <Label>Your copy</Label>
+                            {data.copy.length > 0 ? (
+                                <Button
+                                    variant={"link"}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        setData("copy", "");
+                                    }}
+                                    className="px-0"
+                                >
+                                    Clear textarea
+                                </Button>
+                            ) : (
+                                <Button
+                                    variant={"link"}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        navigator.clipboard
+                                            .readText()
+                                            .then((text) => {
+                                                setData("copy", text);
+                                            });
+                                    }}
+                                    className="px-0"
+                                >
+                                    Paste from clipboard
+                                </Button>
+                            )}
+                        </div>
                         <Textarea
                             placeholder="Paste your copy here."
                             value={data.copy}
@@ -142,24 +198,69 @@ export default function Index({
                         </AccordionItem>
                     </Accordion>
                     <div className="flex justify-end">
-                        <Button disabled={processing}>
-                            {processing ? (
-                                <div className="flex items-center gap-1">
-                                    <Spinner />
-                                    <span>Working some magic…</span>
-                                </div>
-                            ) : (
-                                "Suggest me some icons!"
+                        <div className="flex flex-col items-center gap-1">
+                            <Button
+                                disabled={processing || data.copy.length < 3}
+                                type="submit"
+                            >
+                                {processing ? (
+                                    <div className="flex items-center gap-1">
+                                        <Spinner />
+                                        <span>Working some magic…</span>
+                                    </div>
+                                ) : (
+                                    "Suggest me some icons!"
+                                )}
+                            </Button>
+                            {data.copy.length > 2 && (
+                                <p className="text-sm text-muted-foreground">
+                                    ⌘ + enter
+                                </p>
                             )}
-                        </Button>
+                        </div>
                     </div>
                 </form>
                 <div className="py-8">
                     <Separator />
                 </div>
+                {!suggestedIcons && (
+                    <div className="flex items-center justify-center p-16 text-sm text-center border border-dashed rounded select-none min-h-96 text-muted-foreground bg-muted">
+                        Paste your copy above to get some icon suggestions
+                    </div>
+                )}
                 {suggestedIcons?.length > 0 && (
                     <>
-                        <div className="py-8"></div>
+                        <div className="mb-8">
+                            {selectedType && (
+                                <div className="flex flex-col gap-2">
+                                    <Label>Icon type</Label>
+                                    <Select
+                                        value={selectedType}
+                                        onValueChange={(e) =>
+                                            setSelectedType(e)
+                                        }
+                                    >
+                                        <SelectTrigger className="w-[180px]">
+                                            <SelectValue placeholder="Icon Type" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {availableTypes.map(
+                                                (type: IconType) => {
+                                                    return (
+                                                        <SelectItem
+                                                            key={type.id}
+                                                            value={type.id}
+                                                        >
+                                                            {type.name}
+                                                        </SelectItem>
+                                                    );
+                                                },
+                                            )}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            )}
+                        </div>
                         <div className="grid grid-cols-2 gap-2">
                             {suggestedIcons.map((icon) => (
                                 <Card key={icon.id} className="flex flex-col">

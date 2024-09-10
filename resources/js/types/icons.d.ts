@@ -3,6 +3,11 @@ type IconStyle = {
     svg_content: string;
 };
 
+type IconType = {
+    id: string;
+    name: string;
+};
+
 type Icon = {
     id: number;
     name: string;
