@@ -109,7 +109,7 @@ class IconController extends Controller
                 ],
                 [
                     'role' => 'user',
-                    'content' => "Explain in one short sentence why the '{$iconName}' icon might fit this copy: '{$copy}'",
+                    'content' => "Explain in one short sentence why the '{$iconName}' icon might fit this copy: '{$copy}'. Don't start with something along the lines of 'this icon fits this copy because'. Just say something like the 'xy' icon represents…",
                 ],
             ],
         ]);
