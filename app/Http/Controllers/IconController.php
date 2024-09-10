@@ -86,14 +86,14 @@ class IconController extends Controller
 
         $availableTypes =
             IconVariant::select('type')
-            ->distinct()
-            ->pluck('type')
-            ->map(function ($type) {
-                return [
-                    'id' => $type,
-                    'name' => ucfirst($type),
-                ];
-            });
+                ->distinct()
+                ->pluck('type')
+                ->map(function ($type) {
+                    return [
+                        'id' => $type,
+                        'name' => ucfirst($type),
+                    ];
+                });
 
         return Inertia::render('Icons/Index', [
             'copy' => $copy,
