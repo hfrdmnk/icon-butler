@@ -1,7 +1,11 @@
 import { Toaster } from "@/Components/ui/sonner";
+import { User } from "@/types";
 import { PropsWithChildren } from "react";
 
-export default function App({ children }: PropsWithChildren) {
+export default function App({
+    children,
+    user,
+}: PropsWithChildren<{ user: User }>) {
     return (
         <div>
             <div>{children}</div>
