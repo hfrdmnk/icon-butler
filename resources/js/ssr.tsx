@@ -1,9 +1,8 @@
-import ReactDOMServer from "react-dom/server";
 import { createInertiaApp } from "@inertiajs/react";
 import createServer from "@inertiajs/react/server";
 import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers";
+import ReactDOMServer from "react-dom/server";
 import { route } from "../../vendor/tightenco/ziggy";
-import { RouteName } from "ziggy-js";
 
 const appName = import.meta.env.VITE_APP_NAME || "Laravel";
 
@@ -18,7 +17,8 @@ createServer((page) =>
                 import.meta.glob("./Pages/**/*.tsx"),
             ),
         setup: ({ App, props }) => {
-            global.route<RouteName> = (name, params, absolute) =>
+            // @ts-expect-error
+            (global as any).route = (name, params, absolute) =>
                 route(name, params as any, absolute, {
                     // @ts-expect-error
                     ...page.props.ziggy,
