@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Icon;
 use App\Models\IconVariant;
+use App\Models\Suggestion;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use OpenAI\Laravel\Facades\OpenAI;
@@ -79,16 +80,20 @@ class IconController extends Controller
             ];
         })->values()->all();
 
+        $suggestion = Suggestion::create(['copy' => $copy]);
+        $suggestedIconIds = collect($suggestedIcons)->pluck('id')->all();
+        $suggestion->icons()->attach($suggestedIconIds);
+
         $availableTypes =
             IconVariant::select('type')
-                ->distinct()
-                ->pluck('type')
-                ->map(function ($type) {
-                    return [
-                        'id' => $type,
-                        'name' => ucfirst($type),
-                    ];
-                });
+            ->distinct()
+            ->pluck('type')
+            ->map(function ($type) {
+                return [
+                    'id' => $type,
+                    'name' => ucfirst($type),
+                ];
+            });
 
         return Inertia::render('Icons/Index', [
             'copy' => $copy,
