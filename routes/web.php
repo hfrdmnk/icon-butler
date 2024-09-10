@@ -17,7 +17,9 @@ use Inertia\Inertia;
 
 Route::get('/', [IconController::class, 'index'])->name('icons.index');
 
-Route::post('/', [IconController::class, 'suggestIcons'])->name('icons.suggest');
+Route::middleware(['throttle:suggestions'])->group(function () {
+    Route::post('/', [IconController::class, 'suggestIcons'])->name('icons.suggest');
+});
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
@@ -29,4 +31,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

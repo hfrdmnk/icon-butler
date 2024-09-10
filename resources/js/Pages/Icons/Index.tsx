@@ -33,7 +33,7 @@ import {
 } from "@/Components/ui/tooltip";
 import App from "@/Layouts/AppLayout";
 import { PageProps } from "@/types";
-import { Head, useForm } from "@inertiajs/react";
+import { Head, useForm, usePage } from "@inertiajs/react";
 import { ClipboardIcon } from "@radix-ui/react-icons";
 import { useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
@@ -43,20 +43,25 @@ export default function Index({
     auth,
     suggestedIcons,
     availableTypes,
-    rateLimitError,
 }: PageProps<{
     suggestedIcons: Icon[];
     availableTypes: IconType[];
-    rateLimitError?: string;
 }>) {
+    const { flash } = usePage<PageProps>().props;
     const [selectedType, setSelectedType] = useState<null | string>(null);
+
     useHotkeys("mod+enter", () => handleSubmit(new Event("submit")), {
         enableOnFormTags: true,
     });
 
-    if (rateLimitError) {
-        toast.error(rateLimitError);
-    }
+    useEffect(() => {
+        if (flash.error) {
+            toast.error(flash.error);
+        }
+        if (flash.message) {
+            toast.success(flash.message);
+        }
+    }, [flash]);
 
     const { data, setData, post, processing, errors } = useForm({
         copy: "",
