@@ -1,3 +1,5 @@
+import IconCard from "@/Components/iconCard";
+import IconCardSkeleton from "@/Components/iconCardSkeleton";
 import Spinner from "@/Components/spinner";
 import {
     Accordion,
@@ -7,13 +9,6 @@ import {
 } from "@/Components/ui/accordion";
 import { badgeVariants } from "@/Components/ui/badge";
 import { Button } from "@/Components/ui/button";
-import {
-    Card,
-    CardContent,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/Components/ui/card";
 import { Label } from "@/Components/ui/label";
 import {
     Select,
@@ -23,18 +18,12 @@ import {
     SelectValue,
 } from "@/Components/ui/select";
 import { Separator } from "@/Components/ui/separator";
+import { Skeleton } from "@/Components/ui/skeleton";
 import { Switch } from "@/Components/ui/switch";
 import { Textarea } from "@/Components/ui/textarea";
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from "@/Components/ui/tooltip";
 import App from "@/Layouts/AppLayout";
 import { PageProps } from "@/types";
 import { Head, useForm, usePage } from "@inertiajs/react";
-import { ClipboardIcon } from "@radix-ui/react-icons";
 import { useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { toast } from "sonner";
@@ -71,22 +60,6 @@ export default function Index({
     const handleSubmit = (e: React.FormEvent | Event) => {
         e.preventDefault();
         post(route("icons.suggest"));
-    };
-
-    const copyToClipboard = (icon: Icon) => {
-        if (selectedType) {
-            navigator.clipboard
-                .writeText(icon.iconData[selectedType].svg_content)
-                .then(() => {
-                    toast.success(`SVG "${icon.name}" copied to clipboard`, {
-                        description: "Now go create something awesome!",
-                    });
-                })
-                .catch((err) => {
-                    toast.error("Failed to copy SVG to clipboard");
-                    console.error("Clipboard error:", err);
-                });
-        }
     };
 
     useEffect(() => {
@@ -159,6 +132,7 @@ export default function Index({
                             placeholder="Paste your copy here."
                             value={data.copy}
                             onChange={(e) => setData("copy", e.target.value)}
+                            className="min-h-32 max-h-96"
                         />
                         {errors.copy && (
                             <p className="text-sm text-red-500">
@@ -228,12 +202,25 @@ export default function Index({
                 <div className="py-8">
                     <Separator />
                 </div>
-                {!suggestedIcons && (
-                    <div className="flex items-center justify-center p-16 text-sm text-center border border-dashed rounded select-none min-h-96 text-muted-foreground bg-muted">
-                        Paste your copy above to get some icon suggestions
+                {!suggestedIcons && !processing && (
+                    <div className="flex items-center justify-center p-16 text-sm text-center border border-dashed rounded select-none min-h-96 text-muted-foreground">
+                        Paste your copy above to get some icon suggestions.
                     </div>
                 )}
-                {suggestedIcons?.length > 0 && (
+                {processing && (
+                    <>
+                        <div className="mb-8">
+                            <Skeleton className="w-24 h-6" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                            <IconCardSkeleton />
+                            <IconCardSkeleton />
+                            <IconCardSkeleton />
+                            <IconCardSkeleton />
+                        </div>
+                    </>
+                )}
+                {suggestedIcons?.length > 0 && !processing && (
                     <>
                         <div className="mb-8">
                             {selectedType && (
@@ -268,52 +255,11 @@ export default function Index({
                         </div>
                         <div className="grid grid-cols-2 gap-2">
                             {suggestedIcons.map((icon) => (
-                                <Card key={icon.id} className="flex flex-col">
-                                    <CardHeader>
-                                        <div className="flex items-center gap-4">
-                                            {selectedType && (
-                                                <img
-                                                    src={
-                                                        icon.iconData[
-                                                            selectedType
-                                                        ].file_path
-                                                    }
-                                                    alt={icon.name}
-                                                    className="w-8 h-8"
-                                                />
-                                            )}
-                                            <CardTitle className="font-semibold">
-                                                {icon.name}
-                                            </CardTitle>
-                                        </div>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <p className="text-muted-foreground">
-                                            {icon.explanation}
-                                        </p>
-                                    </CardContent>
-                                    <CardFooter className="mt-auto">
-                                        <TooltipProvider>
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <Button
-                                                        variant={"outline"}
-                                                        onClick={() =>
-                                                            copyToClipboard(
-                                                                icon,
-                                                            )
-                                                        }
-                                                    >
-                                                        <ClipboardIcon className="w-4 h-4" />
-                                                    </Button>
-                                                </TooltipTrigger>
-                                                <TooltipContent>
-                                                    <p>Copy SVG to clipboard</p>
-                                                </TooltipContent>
-                                            </Tooltip>
-                                        </TooltipProvider>
-                                    </CardFooter>
-                                </Card>
+                                <IconCard
+                                    key={icon.id}
+                                    icon={icon}
+                                    selectedType={selectedType ?? ""}
+                                />
                             ))}
                         </div>
                     </>
