@@ -22,6 +22,7 @@ import { Skeleton } from "@/Components/ui/skeleton";
 import { Switch } from "@/Components/ui/switch";
 import { Textarea } from "@/Components/ui/textarea";
 import App from "@/Layouts/AppLayout";
+import { cn } from "@/lib/utils";
 import { PageProps } from "@/types";
 import { Head, useForm, usePage } from "@inertiajs/react";
 import { useEffect, useState } from "react";
@@ -191,11 +192,14 @@ export default function Index({
                                     "Suggest me some icons!"
                                 )}
                             </Button>
-                            {data.copy.length > 2 && (
-                                <p className="text-sm text-muted-foreground">
-                                    ⌘ + enter
-                                </p>
-                            )}
+                            <p
+                                className={cn([
+                                    "text-sm text-muted-foreground",
+                                    data.copy.length < 3 && "opacity-0",
+                                ])}
+                            >
+                                ⌘ + enter
+                            </p>
                         </div>
                     </div>
                 </form>
