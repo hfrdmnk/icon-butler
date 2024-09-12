@@ -39,9 +39,9 @@ class SendDailyStats extends Command
             Icon::withCount(['suggestions' => function ($query) use ($yesterday) {
                 $query->where('icon_suggestion.created_at', '>=', $yesterday);
             }])
-            ->orderBy('suggestions_count', 'desc')
-            ->take(5)
-            ->get();
+                ->orderBy('suggestions_count', 'desc')
+                ->take(5)
+                ->get();
 
         $topIconsText = $mostSuggestedIcons->map(function ($icon) {
             return "• {$icon->name}: {$icon->suggestions_count} suggestions";
