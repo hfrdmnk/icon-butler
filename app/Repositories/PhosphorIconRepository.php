@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Contracts\IconRepositoryInterface;
 use App\Jobs\GenerateIconEmbedding;
 use App\Models\Icon;
+use App\Models\IconSet;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use ZipArchive;
@@ -17,7 +18,7 @@ class PhosphorIconRepository implements IconRepositoryInterface
 
     private const REPO_ZIP_URL = 'https://github.com/phosphor-icons/core/archive/refs/heads/main.zip';
 
-    public function fetchMetadata(): array
+    private function fetchMetadata(): array
     {
         $response = Http::get(self::METADATA_URL);
 
@@ -38,7 +39,12 @@ class PhosphorIconRepository implements IconRepositoryInterface
     public function downloadAndExtractRepo(): void
     {
         $zipPath = storage_path('app/temp_icons/'.self::ICON_SET_NAME.'/repo.zip');
+        $zipDirectory = dirname($zipPath);
         $extractPath = storage_path('app/temp_icons/'.self::ICON_SET_NAME.'/temp');
+
+        if (! is_dir($zipDirectory)) {
+            mkdir($zipDirectory, 0755, true);
+        }
 
         file_put_contents($zipPath, file_get_contents(self::REPO_ZIP_URL));
 
@@ -65,7 +71,9 @@ class PhosphorIconRepository implements IconRepositoryInterface
 
     public function processIcon(array $iconData): void
     {
-        $icon = Icon::firstOrCreate([
+        $iconSet = IconSet::firstOrCreate(['name' => self::ICON_SET_NAME]);
+
+        $icon = $iconSet->icons()->firstOrCreate([
             'name' => $iconData['name'],
             'keywords' => json_encode($iconData['tags']),
         ]);
@@ -127,7 +135,7 @@ class PhosphorIconRepository implements IconRepositoryInterface
         Storage::deleteDirectory('temp_icons/'.self::ICON_SET_NAME);
     }
 
-    public function fetchAndSaveMetadata(): void
+    public function generateMetadata(): void
     {
         $metadata = $this->fetchMetadata();
         Storage::put('temp_icons/'.self::ICON_SET_NAME.'/metadata.json', json_encode($metadata, JSON_PRETTY_PRINT));

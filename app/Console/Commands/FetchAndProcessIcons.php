@@ -29,8 +29,8 @@ class FetchAndProcessIcons extends Command
     {
         $this->info('Fetching and processing icons...');
 
-        IconRepository::fetchAndSaveMetadata();
         IconRepository::downloadAndExtractRepo();
+        IconRepository::generateMetadata();
 
         $processAll = $this->option('all') || App::environment('production');
         $this->processIcons($processAll);

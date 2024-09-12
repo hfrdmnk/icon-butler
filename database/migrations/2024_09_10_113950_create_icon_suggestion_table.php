@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('icon_suggestion', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Suggestion::class);
-            $table->foreignIdFor(Icon::class);
+            $table->foreignIdFor(Suggestion::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Icon::class)->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }

@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('icon_variants', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Icon::class)->constrained()->onDelete('cascade');
+            $table->foreignIdFor(Icon::class)->constrained()->cascadeOnDelete();
             $table->string('type');
             $table->string('file_path');
             $table->timestamps();
