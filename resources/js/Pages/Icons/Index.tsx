@@ -52,10 +52,11 @@ export default function Index({
 
     const handleSubmit = (e: React.FormEvent | Event) => {
         e.preventDefault();
+        resetSelectedType();
         post(route('icons.suggest'));
     };
 
-    useEffect(() => {
+    const resetSelectedType = () => {
         if (availableTypes?.length > 0) {
             const regularType = availableTypes.find((type) => type.id === 'regular');
             if (regularType) {
@@ -66,7 +67,9 @@ export default function Index({
         } else {
             setSelectedType(null);
         }
-    }, [availableTypes]);
+    };
+
+    useEffect(resetSelectedType, [availableTypes]);
 
     return (
         <App user={auth.user}>
