@@ -8,7 +8,7 @@ interface IconRepositoryInterface
 
     public function downloadAndExtractRepo(): void;
 
-    public function generateMetadata(): void;
+    public function storeMetadata(): void;
 
     public function processIcon(array $iconData): void;
 

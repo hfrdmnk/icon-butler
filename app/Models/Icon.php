@@ -14,6 +14,8 @@ class Icon extends Model
 
     protected $fillable = [
         'name',
+        'is_logo',
+        'company_name',
         'keywords',
         'embedding',
     ];

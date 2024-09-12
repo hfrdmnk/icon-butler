@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Facades\IconRepository;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\App;
 
@@ -13,7 +12,7 @@ class FetchAndProcessIcons extends Command
      *
      * @var string
      */
-    protected $signature = 'icons:fetch-and-process {--all : Process all icons}';
+    protected $signature = 'icons:fetch-and-process {iconSet=allIconSets} {--all : Process all icons}';
 
     /**
      * The console command description.
@@ -27,27 +26,61 @@ class FetchAndProcessIcons extends Command
      */
     public function handle()
     {
-        $this->info('Fetching and processing icons...');
+        $iconSet = $this->argument('iconSet');
 
-        IconRepository::downloadAndExtractRepo();
-        IconRepository::generateMetadata();
+        if ($iconSet === 'allIconSets') {
+            $this->processAllIconSets();
+        } else {
+            $this->processSingleIconSet($iconSet);
+        }
+    }
+
+    /**
+     * Process all icon sets.
+     */
+    private function processAllIconSets()
+    {
+        $iconSets = ['phosphor', 'lucide']; // Add all your icon sets here
+
+        foreach ($iconSets as $iconSet) {
+            $this->info("Processing $iconSet icons...");
+            $this->processSingleIconSet($iconSet);
+            $this->info("$iconSet icons processed successfully.");
+            $this->newLine();
+        }
+    }
+
+    /**
+     * Process a single icon set.
+     */
+    private function processSingleIconSet($iconSet)
+    {
+        $repository = app("icon.repository.$iconSet");
+
+        $this->info("Fetching and processing $iconSet icons...");
+
+        $repository->downloadAndExtractRepo();
+        $repository->storeMetadata();
 
         $processAll = $this->option('all') || App::environment('production');
-        $this->processIcons($processAll);
+        $this->processIcons($processAll, $repository);
 
-        IconRepository::cleanup();
+        $repository->cleanup();
 
-        $this->info('Icons fetched and processed successfully.');
+        $this->info("$iconSet icons fetched and processed successfully.");
         $this->info('Temporary data has been cleaned up.');
     }
 
-    private function processIcons(bool $processAll)
+    /**
+     * Process icons.
+     */
+    private function processIcons(bool $processAll, $repository)
     {
-        $totalIcons = IconRepository::getTotalIconCount();
+        $totalIcons = $repository->getTotalIconCount();
         $bar = $this->output->createProgressBar($totalIcons);
         $bar->start();
 
-        IconRepository::processIcons($processAll, function () use ($bar) {
+        $repository->processIcons($processAll, function () use ($bar) {
             $bar->advance();
         });
 

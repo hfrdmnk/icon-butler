@@ -18,7 +18,7 @@ class PhosphorIconRepository implements IconRepositoryInterface
 
     private const REPO_ZIP_URL = 'https://github.com/phosphor-icons/core/archive/refs/heads/main.zip';
 
-    private function fetchMetadata(): array
+    private function prepareMetadata(): array
     {
         $response = Http::get(self::METADATA_URL);
 
@@ -30,7 +30,7 @@ class PhosphorIconRepository implements IconRepositoryInterface
         $jsonContent = $this->convertTypescriptToJson($content);
 
         if (! is_array($jsonContent)) {
-            throw new \Exception('Failed to convert metadata to JSON.');
+            throw new \Exception('Failed to prepare metadata.');
         }
 
         return $jsonContent;
@@ -72,9 +72,13 @@ class PhosphorIconRepository implements IconRepositoryInterface
     public function processIcon(array $iconData): void
     {
         $iconSet = IconSet::firstOrCreate(['name' => self::ICON_SET_NAME]);
+        $isLogo = str_contains(strtolower($iconData['name']), 'logo');
+        $companyName = $isLogo ? str_replace('-', ' ', str_replace('-logo', '', strtolower($iconData['name']))) : null;
 
         $icon = $iconSet->icons()->firstOrCreate([
             'name' => $iconData['name'],
+            'is_logo' => $isLogo,
+            'company_name' => $companyName,
             'keywords' => json_encode($iconData['tags']),
         ]);
 
@@ -135,9 +139,9 @@ class PhosphorIconRepository implements IconRepositoryInterface
         Storage::deleteDirectory('temp_icons/'.self::ICON_SET_NAME);
     }
 
-    public function generateMetadata(): void
+    public function storeMetadata(): void
     {
-        $metadata = $this->fetchMetadata();
+        $metadata = $this->prepareMetadata();
         Storage::put('temp_icons/'.self::ICON_SET_NAME.'/metadata.json', json_encode($metadata, JSON_PRETTY_PRINT));
     }
 
@@ -164,7 +168,7 @@ class PhosphorIconRepository implements IconRepositoryInterface
     {
         $metadataPath = 'temp_icons/'.self::ICON_SET_NAME.'/metadata.json';
         if (! Storage::exists($metadataPath)) {
-            throw new \Exception('Metadata file not found. Please run fetchAndSaveMetadata first.');
+            throw new \Exception('Metadata file not found.');
         }
 
         return json_decode(Storage::get($metadataPath), true);

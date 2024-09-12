@@ -40,10 +40,21 @@ class IconController extends Controller
 
         // Filter icons based on name and explicit mention in copy
         $filteredIcons = $icons->filter(function ($icon) use ($copy, $excludeUnmentionedLogos) {
-            if (str_contains(strtolower($icon->name), 'logo') && $excludeUnmentionedLogos) {
-                $companyName = str_replace('-logo', '', strtolower($icon->name));
+            if ($icon->is_logo && $excludeUnmentionedLogos) {
+                $companyName = strtolower($icon->company_name);
+                $copyLower = strtolower($copy);
 
-                return str_contains(strtolower($copy), $companyName);
+                // Create variations of the company name
+                $variations = [
+                    $companyName,
+                    str_replace(' ', '-', $companyName),
+                    str_replace(' ', '.', $companyName),
+                ];
+
+                // Check if any variation is present in the copy
+                return collect($variations)->contains(function ($variation) use ($copyLower) {
+                    return str_contains($copyLower, $variation);
+                });
             }
 
             return true;

@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Contracts\IconRepositoryInterface;
+use App\Repositories\LucideIconRepository;
 use App\Repositories\PhosphorIconRepository;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\RateLimiter;
@@ -15,9 +16,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind('icon.repository', function ($app) {
-            return new PhosphorIconRepository;
-        });
+        $this->app->bind('icon.repository.phosphor', PhosphorIconRepository::class);
+        $this->app->bind('icon.repository.lucide', LucideIconRepository::class);
 
         $this->app->bind(IconRepositoryInterface::class, PhosphorIconRepository::class);
     }

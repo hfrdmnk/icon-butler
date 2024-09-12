@@ -15,10 +15,14 @@ return new class extends Migration
         Schema::create('icons', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(IconSet::class)->constrained()->cascadeOnDelete();
-            $table->string('name')->unique();
+            $table->string('name');
+            $table->boolean('is_logo')->default(false);
+            $table->string('company_name')->nullable();
             $table->text('keywords')->nullable();
             $table->text('embedding')->nullable();
             $table->timestamps();
+
+            $table->unique(['icon_set_id', 'name']);
         });
     }
 

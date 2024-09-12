@@ -12,6 +12,8 @@ class IconSet extends Model
 
     protected $fillable = [
         'name',
+        'display_name',
+        'url',
     ];
 
     public function icons(): HasMany
