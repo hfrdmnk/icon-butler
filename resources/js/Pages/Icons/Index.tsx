@@ -2,7 +2,7 @@ import IconCard from '@/Components/iconCard';
 import IconCardSkeleton from '@/Components/iconCardSkeleton';
 import Spinner from '@/Components/spinner';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/Components/ui/accordion';
-import { badgeVariants } from '@/Components/ui/badge';
+import { Badge } from '@/Components/ui/badge';
 import { Button } from '@/Components/ui/button';
 import { Label } from '@/Components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/Components/ui/select';
@@ -20,9 +20,11 @@ import { toast } from 'sonner';
 
 export default function Index({
     auth,
+    iconSets,
     suggestedIcons,
     availableTypes,
 }: PageProps<{
+    iconSets: IconSet[];
     suggestedIcons: Icon[];
     availableTypes: IconType[];
 }>) {
@@ -44,6 +46,7 @@ export default function Index({
 
     const { data, setData, post, processing, errors } = useForm({
         copy: '',
+        iconSet: iconSets[0].name,
         excludeUnmentionedLogos: true,
     });
 
@@ -72,13 +75,7 @@ export default function Index({
                 <h1 className="text-muted-foreground">Icon Butler</h1>
                 <p className="scroll-m-20 text-2xl font-semibold tracking-tight">Always serving you the best icons.</p>
                 <div className="mt-4">
-                    <a
-                        href="https://phosphoricons.com/"
-                        target="_blank"
-                        className={badgeVariants({ variant: 'outline' })}
-                    >
-                        Powered by Phosphor Icons
-                    </a>
+                    <Badge variant={'outline'}>Powered by the best open source icon sets</Badge>
                 </div>
             </header>
             <main className="container max-w-3xl py-8">
@@ -119,6 +116,33 @@ export default function Index({
                             className="max-h-96 min-h-32"
                         />
                         {errors.copy && <p className="text-sm text-red-500">{errors.copy}</p>}
+                    </div>
+                    <div className="flex flex-col gap-2">
+                        <Label>Choose your icon set</Label>
+                        <Select value={data.iconSet} onValueChange={(e) => setData('iconSet', e)}>
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Icon Type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {iconSets.map((set: IconSet) => {
+                                    return (
+                                        <SelectItem key={set.id} value={set.name}>
+                                            {set.display_name}
+                                        </SelectItem>
+                                    );
+                                })}
+                            </SelectContent>
+                        </Select>
+                        <p className="text-sm text-muted-foreground">
+                            More information on this icon set:{' '}
+                            <a
+                                href={iconSets.find((s) => s.name === data.iconSet)?.url}
+                                target="_blank"
+                                className="underline"
+                            >
+                                {iconSets.find((s) => s.name === data.iconSet)?.display_name}
+                            </a>
+                        </p>
                     </div>
                     <Accordion type="single" collapsible>
                         <AccordionItem value="advanced-settings" className="border-b-0">

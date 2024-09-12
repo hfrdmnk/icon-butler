@@ -16,3 +16,10 @@ type Icon = {
         [key: string]: IconStyle;
     };
 };
+
+type IconSet = {
+    id: number;
+    name: string;
+    display_name: string;
+    url: string;
+};

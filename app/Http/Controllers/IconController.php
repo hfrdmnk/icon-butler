@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Icon;
+use App\Models\IconSet;
 use App\Models\IconVariant;
-use App\Models\Suggestion;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use OpenAI\Laravel\Facades\OpenAI;
@@ -13,17 +13,21 @@ class IconController extends Controller
 {
     public function index()
     {
-        return Inertia::render('Icons/Index');
+        return Inertia::render('Icons/Index', [
+            'iconSets' => IconSet::all(),
+        ]);
     }
 
     public function suggestIcons(Request $request)
     {
         $request->validate([
             'copy' => 'required|min:3',
+            'iconSet' => 'required|exists:icon_sets,name',
             'excludeUnmentionedLogos' => 'boolean',
         ]);
 
         $copy = $request->input('copy');
+        $iconSetName = $request->input('iconSet');
         $excludeUnmentionedLogos = $request->input('excludeUnmentionedLogos');
 
         // Generate embedding for user's copy
@@ -33,8 +37,13 @@ class IconController extends Controller
         ]);
         $copyEmbedding = $response->embeddings[0]->embedding;
 
+        // Retrieve icon set
+        $iconSet = IconSet::where('name', $iconSetName)->first();
+
         // Retrieve all icons with embeddings
-        $icons = Icon::whereNotNull('embedding')
+        $icons = $iconSet
+            ->icons()
+            ->whereNotNull('embedding')
             ->with('variants')
             ->get();
 
@@ -91,12 +100,13 @@ class IconController extends Controller
             ];
         })->values()->all();
 
-        $suggestion = Suggestion::create(['copy' => $copy]);
+        $suggestion = $iconSet->suggestions()->create(['copy' => $copy]);
         $suggestedIconIds = collect($suggestedIcons)->pluck('id')->all();
         $suggestion->icons()->attach($suggestedIconIds);
 
         $availableTypes =
             IconVariant::select('type')
+                ->whereIn('icon_id', $filteredIcons->pluck('id'))
                 ->distinct()
                 ->pluck('type')
                 ->map(function ($type) {
@@ -107,6 +117,8 @@ class IconController extends Controller
                 });
 
         return Inertia::render('Icons/Index', [
+            'iconSets' => IconSet::all(),
+            'iconSet' => $iconSetName,
             'copy' => $copy,
             'excludeUnmentionedLogos' => $excludeUnmentionedLogos,
             'suggestedIcons' => $suggestedIcons,

@@ -94,7 +94,7 @@ class LucideIconRepository implements IconRepositoryInterface
 
     private function processSvg(string $svgContent): string
     {
-        return preg_replace('/fill="[^"]+"/', 'fill="currentColor"', $svgContent);
+        return $svgContent;
     }
 
     private function iconNeedsProcessing($variant, $processedSvg, $destinationPath): bool
