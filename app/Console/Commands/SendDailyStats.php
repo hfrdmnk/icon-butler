@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Icon;
+use App\Models\IconSet;
 use App\Models\Suggestion;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -47,7 +48,22 @@ class SendDailyStats extends Command
             return "• {$icon->name}: {$icon->suggestions_count} suggestions";
         })->join("\n");
 
-        // Log::info($topIconsText);
+        $iconSets = Suggestion::where('created_at', '>=', $yesterday)
+            ->get()
+            ->groupBy('icon_set_id')
+            ->map(function ($suggestions) {
+                return [
+                    'display_name' => IconSet::find($suggestions->first()->icon_set_id)->display_name,
+                    'suggestions_count' => $suggestions->count(),
+                ];
+            })
+            ->sortByDesc('suggestions_count');
+
+        $iconSetsText = $iconSets->map(function ($iconSet) {
+            return "• {$iconSet['display_name']}: {$iconSet['suggestions_count']} suggestions";
+        })->join("\n");
+
+        // Log::info($topIconsText . "\n" . $iconSetsText);
 
         SlackAlert::blocks(
             [
@@ -63,6 +79,13 @@ class SendDailyStats extends Command
                     'text' => [
                         'type' => 'mrkdwn',
                         'text' => "*Total suggestions in the last 24 hours:* {$totalSuggestions}",
+                    ],
+                ],
+                [
+                    'type' => 'section',
+                    'text' => [
+                        'type' => 'mrkdwn',
+                        'text' => "*Most used icon sets:*\n{$iconSetsText}",
                     ],
                 ],
                 [
