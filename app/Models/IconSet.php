@@ -23,6 +23,6 @@ class IconSet extends Model
 
     public function suggestions(): HasMany
     {
-        return $this->hasmany(Suggestion::class);
+        return $this->hasMany(Suggestion::class);
     }
 }
