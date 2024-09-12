@@ -1,33 +1,22 @@
-import IconCard from "@/Components/iconCard";
-import IconCardSkeleton from "@/Components/iconCardSkeleton";
-import Spinner from "@/Components/spinner";
-import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-} from "@/Components/ui/accordion";
-import { badgeVariants } from "@/Components/ui/badge";
-import { Button } from "@/Components/ui/button";
-import { Label } from "@/Components/ui/label";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/Components/ui/select";
-import { Separator } from "@/Components/ui/separator";
-import { Skeleton } from "@/Components/ui/skeleton";
-import { Switch } from "@/Components/ui/switch";
-import { Textarea } from "@/Components/ui/textarea";
-import App from "@/Layouts/AppLayout";
-import { cn } from "@/lib/utils";
-import { PageProps } from "@/types";
-import { Head, useForm, usePage } from "@inertiajs/react";
-import { useEffect, useState } from "react";
-import { useHotkeys } from "react-hotkeys-hook";
-import { toast } from "sonner";
+import IconCard from '@/Components/iconCard';
+import IconCardSkeleton from '@/Components/iconCardSkeleton';
+import Spinner from '@/Components/spinner';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/Components/ui/accordion';
+import { badgeVariants } from '@/Components/ui/badge';
+import { Button } from '@/Components/ui/button';
+import { Label } from '@/Components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/Components/ui/select';
+import { Separator } from '@/Components/ui/separator';
+import { Skeleton } from '@/Components/ui/skeleton';
+import { Switch } from '@/Components/ui/switch';
+import { Textarea } from '@/Components/ui/textarea';
+import App from '@/Layouts/AppLayout';
+import { cn } from '@/lib/utils';
+import { PageProps } from '@/types';
+import { Head, useForm, usePage } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
+import { toast } from 'sonner';
 
 export default function Index({
     auth,
@@ -40,7 +29,7 @@ export default function Index({
     const { flash } = usePage<PageProps>().props;
     const [selectedType, setSelectedType] = useState<null | string>(null);
 
-    useHotkeys("mod+enter", () => handleSubmit(new Event("submit")), {
+    useHotkeys('mod+enter', () => handleSubmit(new Event('submit')), {
         enableOnFormTags: true,
     });
 
@@ -54,22 +43,20 @@ export default function Index({
     }, [flash]);
 
     const { data, setData, post, processing, errors } = useForm({
-        copy: "",
+        copy: '',
         excludeUnmentionedLogos: true,
     });
 
     const handleSubmit = (e: React.FormEvent | Event) => {
         e.preventDefault();
-        post(route("icons.suggest"));
+        post(route('icons.suggest'));
     };
 
     useEffect(() => {
         if (availableTypes?.length > 0) {
-            const regularType = availableTypes.find(
-                (type) => type.id === "regular",
-            );
+            const regularType = availableTypes.find((type) => type.id === 'regular');
             if (regularType) {
-                setSelectedType("regular");
+                setSelectedType('regular');
             } else {
                 setSelectedType(availableTypes[0].id);
             }
@@ -81,16 +68,14 @@ export default function Index({
     return (
         <App user={auth.user}>
             <Head title="Serving icons" />
-            <header className="container max-w-3xl py-12 mt-8">
+            <header className="container mt-8 max-w-3xl py-12">
                 <h1 className="text-muted-foreground">Icon Butler</h1>
-                <p className="text-2xl font-semibold tracking-tight scroll-m-20">
-                    Always serving you the best icons.
-                </p>
+                <p className="scroll-m-20 text-2xl font-semibold tracking-tight">Always serving you the best icons.</p>
                 <div className="mt-4">
                     <a
                         href="https://phosphoricons.com/"
                         target="_blank"
-                        className={badgeVariants({ variant: "outline" })}
+                        className={badgeVariants({ variant: 'outline' })}
                     >
                         Powered by Phosphor Icons
                     </a>
@@ -99,14 +84,14 @@ export default function Index({
             <main className="container max-w-3xl py-8">
                 <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
                     <div className="flex flex-col gap-2">
-                        <div className="flex items-center justify-between h-9">
+                        <div className="flex h-9 items-center justify-between">
                             <Label>Your copy</Label>
                             {data.copy.length > 0 ? (
                                 <Button
-                                    variant={"link"}
+                                    variant={'link'}
                                     onClick={(e) => {
                                         e.preventDefault();
-                                        setData("copy", "");
+                                        setData('copy', '');
                                     }}
                                     className="px-0"
                                 >
@@ -114,14 +99,12 @@ export default function Index({
                                 </Button>
                             ) : (
                                 <Button
-                                    variant={"link"}
+                                    variant={'link'}
                                     onClick={(e) => {
                                         e.preventDefault();
-                                        navigator.clipboard
-                                            .readText()
-                                            .then((text) => {
-                                                setData("copy", text);
-                                            });
+                                        navigator.clipboard.readText().then((text) => {
+                                            setData('copy', text);
+                                        });
                                     }}
                                     className="px-0"
                                 >
@@ -132,46 +115,28 @@ export default function Index({
                         <Textarea
                             placeholder="Paste your copy here."
                             value={data.copy}
-                            onChange={(e) => setData("copy", e.target.value)}
-                            className="min-h-32 max-h-96"
+                            onChange={(e) => setData('copy', e.target.value)}
+                            className="max-h-96 min-h-32"
                         />
-                        {errors.copy && (
-                            <p className="text-sm text-red-500">
-                                {errors.copy}
-                            </p>
-                        )}
+                        {errors.copy && <p className="text-sm text-red-500">{errors.copy}</p>}
                     </div>
                     <Accordion type="single" collapsible>
-                        <AccordionItem
-                            value="advanced-settings"
-                            className="border-b-0"
-                        >
-                            <AccordionTrigger>
-                                Advanced settings
-                            </AccordionTrigger>
+                        <AccordionItem value="advanced-settings" className="border-b-0">
+                            <AccordionTrigger>Advanced settings</AccordionTrigger>
                             <AccordionContent>
                                 <div className="flex flex-col gap-2">
                                     <div className="flex items-center gap-2">
                                         <Switch
                                             id="exclude-logos"
-                                            checked={
-                                                data.excludeUnmentionedLogos
-                                            }
-                                            onCheckedChange={(e) =>
-                                                setData(
-                                                    "excludeUnmentionedLogos",
-                                                    e,
-                                                )
-                                            }
+                                            checked={data.excludeUnmentionedLogos}
+                                            onCheckedChange={(e) => setData('excludeUnmentionedLogos', e)}
                                         />
                                         <Label htmlFor="exclude-logos">
-                                            Exclude company logos not explicitly
-                                            mentioned
+                                            Exclude company logos not explicitly mentioned
                                         </Label>
                                     </div>
                                     <p className="text-sm text-muted-foreground">
-                                        This usually results in a more accurate
-                                        match.
+                                        This usually results in a more accurate match.
                                     </p>
                                 </div>
                             </AccordionContent>
@@ -179,25 +144,17 @@ export default function Index({
                     </Accordion>
                     <div className="flex justify-end">
                         <div className="flex flex-col items-center gap-1">
-                            <Button
-                                disabled={processing || data.copy.length < 3}
-                                type="submit"
-                            >
+                            <Button disabled={processing || data.copy.length < 3} type="submit">
                                 {processing ? (
                                     <div className="flex items-center gap-1">
                                         <Spinner />
                                         <span>Working some magic…</span>
                                     </div>
                                 ) : (
-                                    "Suggest me some icons!"
+                                    'Suggest me some icons!'
                                 )}
                             </Button>
-                            <p
-                                className={cn([
-                                    "text-sm text-muted-foreground",
-                                    data.copy.length < 3 && "opacity-0",
-                                ])}
-                            >
+                            <p className={cn(['text-sm text-muted-foreground', data.copy.length < 3 && 'opacity-0'])}>
                                 ⌘ + enter
                             </p>
                         </div>
@@ -207,14 +164,14 @@ export default function Index({
                     <Separator />
                 </div>
                 {!suggestedIcons && !processing && (
-                    <div className="flex items-center justify-center p-16 text-sm text-center border border-dashed rounded select-none min-h-96 text-muted-foreground">
+                    <div className="flex min-h-96 select-none items-center justify-center rounded border border-dashed p-16 text-center text-sm text-muted-foreground">
                         Paste your copy above to get some icon suggestions.
                     </div>
                 )}
                 {processing && (
                     <>
                         <div className="mb-8">
-                            <Skeleton className="w-24 h-6" />
+                            <Skeleton className="h-6 w-24" />
                         </div>
                         <div className="grid grid-cols-2 gap-2">
                             <IconCardSkeleton />
@@ -230,28 +187,18 @@ export default function Index({
                             {selectedType && (
                                 <div className="flex flex-col gap-2">
                                     <Label>Icon type</Label>
-                                    <Select
-                                        value={selectedType}
-                                        onValueChange={(e) =>
-                                            setSelectedType(e)
-                                        }
-                                    >
+                                    <Select value={selectedType} onValueChange={(e) => setSelectedType(e)}>
                                         <SelectTrigger className="w-[180px]">
                                             <SelectValue placeholder="Icon Type" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {availableTypes.map(
-                                                (type: IconType) => {
-                                                    return (
-                                                        <SelectItem
-                                                            key={type.id}
-                                                            value={type.id}
-                                                        >
-                                                            {type.name}
-                                                        </SelectItem>
-                                                    );
-                                                },
-                                            )}
+                                            {availableTypes.map((type: IconType) => {
+                                                return (
+                                                    <SelectItem key={type.id} value={type.id}>
+                                                        {type.name}
+                                                    </SelectItem>
+                                                );
+                                            })}
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -259,11 +206,7 @@ export default function Index({
                         </div>
                         <div className="grid grid-cols-2 gap-2">
                             {suggestedIcons.map((icon) => (
-                                <IconCard
-                                    key={icon.id}
-                                    icon={icon}
-                                    selectedType={selectedType ?? ""}
-                                />
+                                <IconCard key={icon.id} icon={icon} selectedType={selectedType ?? ''} />
                             ))}
                         </div>
                     </>

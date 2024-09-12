@@ -1,24 +1,21 @@
-import { Toaster } from "@/Components/ui/sonner";
-import { User } from "@/types";
-import { PropsWithChildren } from "react";
+import { Toaster } from '@/Components/ui/sonner';
+import { User } from '@/types';
+import { PropsWithChildren } from 'react';
 
-export default function App({
-    children,
-    user,
-}: PropsWithChildren<{ user: User }>) {
+export default function App({ children, user }: PropsWithChildren<{ user: User }>) {
     return (
         <div>
             <div>{children}</div>
-            <footer className="container py-12 text-sm text-center text-muted-foreground">
+            <footer className="container py-12 text-center text-sm text-muted-foreground">
                 <p>
-                    A{" "}
+                    A{' '}
                     <a href="https://linea.studio" target="_blank">
                         Linea
-                    </a>{" "}
-                    ×{" "}
+                    </a>{' '}
+                    ×{' '}
                     <a href="https://bloqlabs.ch" target="_blank">
                         Bloq Labs
-                    </a>{" "}
+                    </a>{' '}
                     projektli.
                 </p>
             </footer>
