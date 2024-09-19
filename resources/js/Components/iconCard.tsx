@@ -26,7 +26,7 @@ export default function IconCard({ icon, selectedType }: { icon: Icon; selectedT
             <CardHeader>
                 <div className="flex items-center gap-4">
                     {selectedType && (
-                        <img src={icon.iconData[selectedType].file_path} alt={icon.name} className="w-8 h-8" />
+                        <img src={icon.iconData[selectedType].file_path} alt={icon.name} className="h-8 w-8" />
                     )}
                     <CardTitle className="font-semibold">{icon.name}</CardTitle>
                 </div>
@@ -41,7 +41,7 @@ export default function IconCard({ icon, selectedType }: { icon: Icon; selectedT
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button variant={'outline'} onClick={() => copyToClipboard(icon)}>
-                                <ClipboardIcon className="w-4 h-4" />
+                                <ClipboardIcon className="h-4 w-4" />
                             </Button>
                         </TooltipTrigger>
                         <TooltipContent>

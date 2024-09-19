@@ -122,9 +122,9 @@ export default function Index({ auth, iconSets, availableTypes }: IndexPageProps
     return (
         <App user={auth.user}>
             <Head title="Serving icons" />
-            <header className="container max-w-3xl py-12 mt-8">
+            <header className="container mt-8 max-w-3xl py-12">
                 <h1 className="text-muted-foreground">Icon Butler</h1>
-                <p className="text-2xl font-semibold tracking-tight scroll-m-20">Always serving you the best icons.</p>
+                <p className="scroll-m-20 text-2xl font-semibold tracking-tight">Always serving you the best icons.</p>
                 <div className="mt-4">
                     <Badge variant={'outline'}>Powered by the best open source icon sets</Badge>
                 </div>
@@ -132,7 +132,7 @@ export default function Index({ auth, iconSets, availableTypes }: IndexPageProps
             <main className="container max-w-3xl py-8">
                 <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
                     <div className="flex flex-col gap-2">
-                        <div className="flex items-center justify-between h-9">
+                        <div className="flex h-9 items-center justify-between">
                             <Label>Your copy</Label>
                             {data.copy.length > 0 ? (
                                 <Button
@@ -240,14 +240,14 @@ export default function Index({ auth, iconSets, availableTypes }: IndexPageProps
                     <Separator />
                 </div>
                 {(!availableIcons || availableIcons?.length === 0) && !processing && (
-                    <div className="flex items-center justify-center p-16 text-sm text-center border border-dashed rounded select-none min-h-96 text-muted-foreground">
+                    <div className="flex min-h-96 select-none items-center justify-center rounded border border-dashed p-16 text-center text-sm text-muted-foreground">
                         Paste your copy above to get some icon suggestions.
                     </div>
                 )}
                 {processing && (
                     <>
                         <div className="mb-8">
-                            <Skeleton className="w-24 h-6" />
+                            <Skeleton className="h-6 w-24" />
                         </div>
                         <div className="grid grid-cols-2 gap-2">
                             <IconCardSkeleton />
@@ -286,7 +286,7 @@ export default function Index({ auth, iconSets, availableTypes }: IndexPageProps
                             ))}
                         </div>
                         {loadMoreAttempts < 3 && (
-                            <div className="flex flex-col items-center justify-center gap-1 mt-8">
+                            <div className="mt-8 flex flex-col items-center justify-center gap-1">
                                 <Button
                                     variant={'outline'}
                                     onClick={handleLoadMore}

@@ -6,7 +6,6 @@ use App\Models\Icon;
 use App\Models\IconSet;
 use App\Models\IconVariant;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use OpenAI\Laravel\Facades\OpenAI;
 
@@ -37,7 +36,7 @@ class IconController extends Controller
         $keywordsEmbedding = $validated['keywordsEmbedding'] ?? null;
         $suggestionId = $validated['suggestionId'] ?? null;
 
-        if (!$keywordsEmbedding) {
+        if (! $keywordsEmbedding) {
             // Based on the copy, generate keywords that can be embedded
             $keywordsResponse = OpenAI::chat()->create([
                 'model' => 'gpt-4o-mini',
@@ -111,7 +110,7 @@ class IconController extends Controller
             ->sortByDesc('similarity');
 
         // Get top 4 matches
-        $suggestedIcons = $iconSimilarities->take(4)->map(function ($item) use ($copy) {
+        $suggestedIcons = $iconSimilarities->take(4)->map(function ($item) {
             $icon = $item['icon'];
             // $explanation = $this->generateExplanation($icon->name, $copy);
             $iconData = $icon->variants->mapWithKeys(function ($variant) {
@@ -131,7 +130,7 @@ class IconController extends Controller
             ];
         })->values()->all();
 
-        if (!$suggestionId) {
+        if (! $suggestionId) {
             $suggestion = $iconSet->suggestions()->create(['copy' => $copy, 'exclude_unmentioned_logos' => $excludeUnmentionedLogos, 'generated_keywords' => $generatedKeywordsToEmbed]);
         } else {
             $suggestion = $iconSet->suggestions()->find($suggestionId);
@@ -142,15 +141,15 @@ class IconController extends Controller
 
         $availableTypes =
             IconVariant::select('type')
-            ->whereIn('icon_id', $filteredIcons->pluck('id'))
-            ->distinct()
-            ->pluck('type')
-            ->map(function ($type) {
-                return [
-                    'id' => $type,
-                    'name' => ucfirst($type),
-                ];
-            });
+                ->whereIn('icon_id', $filteredIcons->pluck('id'))
+                ->distinct()
+                ->pluck('type')
+                ->map(function ($type) {
+                    return [
+                        'id' => $type,
+                        'name' => ucfirst($type),
+                    ];
+                });
 
         return Inertia::render('Icons/Index', [
             'iconSets' => IconSet::all(),
