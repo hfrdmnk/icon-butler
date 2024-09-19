@@ -24,7 +24,7 @@ export default function IconCard({ icon, selectedType }: { icon: Icon; selectedT
     return (
         <Card key={icon.id} className="flex flex-col">
             <CardHeader>
-                <div className="flex items-center gap-4">
+                <div className="flex flex-col gap-4">
                     {selectedType && (
                         <img src={icon.iconData[selectedType].file_path} alt={icon.name} className="h-8 w-8" />
                     )}
