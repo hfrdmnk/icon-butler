@@ -48,7 +48,7 @@ class IconController extends Controller
 
         $generatedKeywordsToEmbed = strtolower($keywordsResponse->choices[0]->message->content);
 
-        Log::info('Generated keywords: ' . $generatedKeywordsToEmbed);
+        Log::info('Generated keywords: '.$generatedKeywordsToEmbed);
 
         // Generate embedding for user's copy
         $embeddingResponse = OpenAI::embeddings()->create([
@@ -126,15 +126,15 @@ class IconController extends Controller
 
         $availableTypes =
             IconVariant::select('type')
-            ->whereIn('icon_id', $filteredIcons->pluck('id'))
-            ->distinct()
-            ->pluck('type')
-            ->map(function ($type) {
-                return [
-                    'id' => $type,
-                    'name' => ucfirst($type),
-                ];
-            });
+                ->whereIn('icon_id', $filteredIcons->pluck('id'))
+                ->distinct()
+                ->pluck('type')
+                ->map(function ($type) {
+                    return [
+                        'id' => $type,
+                        'name' => ucfirst($type),
+                    ];
+                });
 
         return Inertia::render('Icons/Index', [
             'iconSets' => IconSet::all(),
