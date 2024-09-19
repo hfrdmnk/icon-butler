@@ -12,6 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('suggestions', function (Blueprint $table) {
+            $table->boolean('exclude_unmentioned_logos')->default(true);
             $table->text('generated_keywords')->nullable();
         });
     }
@@ -22,6 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('suggestions', function (Blueprint $table) {
+            $table->dropColumn('exclude_unmentioned_logos');
             $table->dropColumn('generated_keywords');
         });
     }

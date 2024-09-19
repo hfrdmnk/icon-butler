@@ -13,6 +13,7 @@ class Suggestion extends Model
 
     protected $fillable = [
         'copy',
+        'exclude_unmentioned_logos',
         'generated_keywords',
     ];
 

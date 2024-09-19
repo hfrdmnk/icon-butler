@@ -6,6 +6,7 @@ use App\Models\Icon;
 use App\Models\IconSet;
 use App\Models\IconVariant;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use OpenAI\Laravel\Facades\OpenAI;
 
@@ -45,7 +46,9 @@ class IconController extends Controller
             ],
         ]);
 
-        $generatedKeywordsToEmbed = $keywordsResponse->choices[0]->message->content;
+        $generatedKeywordsToEmbed = strtolower($keywordsResponse->choices[0]->message->content);
+
+        Log::info('Generated keywords: ' . $generatedKeywordsToEmbed);
 
         // Generate embedding for user's copy
         $embeddingResponse = OpenAI::embeddings()->create([
@@ -117,21 +120,21 @@ class IconController extends Controller
             ];
         })->values()->all();
 
-        $suggestion = $iconSet->suggestions()->create(['copy' => $copy, 'generated_keywords' => $generatedKeywordsToEmbed]);
+        $suggestion = $iconSet->suggestions()->create(['copy' => $copy, 'exclude_unmentioned_logos' => $excludeUnmentionedLogos, 'generated_keywords' => $generatedKeywordsToEmbed]);
         $suggestedIconIds = collect($suggestedIcons)->pluck('id')->all();
         $suggestion->icons()->attach($suggestedIconIds);
 
         $availableTypes =
             IconVariant::select('type')
-                ->whereIn('icon_id', $filteredIcons->pluck('id'))
-                ->distinct()
-                ->pluck('type')
-                ->map(function ($type) {
-                    return [
-                        'id' => $type,
-                        'name' => ucfirst($type),
-                    ];
-                });
+            ->whereIn('icon_id', $filteredIcons->pluck('id'))
+            ->distinct()
+            ->pluck('type')
+            ->map(function ($type) {
+                return [
+                    'id' => $type,
+                    'name' => ucfirst($type),
+                ];
+            });
 
         return Inertia::render('Icons/Index', [
             'iconSets' => IconSet::all(),
