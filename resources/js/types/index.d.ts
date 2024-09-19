@@ -17,3 +17,10 @@ export type PageProps<T extends Record<string, unknown> = Record<string, unknown
         error?: string;
     };
 };
+
+export type IndexPageProps = PageProps<{
+    iconSets: IconSet[];
+    availableTypes: IconType[];
+    keywordsEmbedding?: string;
+    suggestionId?: number;
+}>;

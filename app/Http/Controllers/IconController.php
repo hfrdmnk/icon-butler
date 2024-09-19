@@ -21,41 +21,47 @@ class IconController extends Controller
 
     public function suggestIcons(Request $request)
     {
-        $request->validate([
-            'copy' => 'required|min:3',
-            'iconSet' => 'required|exists:icon_sets,name',
-            'excludeUnmentionedLogos' => 'boolean',
+        $validated = $request->validate([
+            'copy' => ['required', 'min:3'],
+            'iconSet' => ['required', 'exists:icon_sets,name'],
+            'excludeUnmentionedLogos' => ['required', 'boolean'],
+            'alreadySuggestedIcons' => ['nullable', 'array'],
+            'keywordsEmbedding' => ['nullable', 'array'],
+            'suggestionId' => ['nullable', 'exists:suggestions,id'],
         ]);
 
-        $copy = $request->input('copy');
-        $iconSetName = $request->input('iconSet');
-        $excludeUnmentionedLogos = $request->input('excludeUnmentionedLogos');
+        $copy = $validated['copy'];
+        $iconSetName = $validated['iconSet'];
+        $excludeUnmentionedLogos = $validated['excludeUnmentionedLogos'];
+        $alreadySuggestedIcons = $validated['alreadySuggestedIcons'] ?? [];
+        $keywordsEmbedding = $validated['keywordsEmbedding'] ?? null;
+        $suggestionId = $validated['suggestionId'] ?? null;
 
-        // Based on the copy, generate keywords that can be embedded
-        $keywordsResponse = OpenAI::chat()->create([
-            'model' => 'gpt-4o-mini',
-            'messages' => [
-                [
-                    'role' => 'system',
-                    'content' => 'You are a helpful assistant that can take a piece of ui copy and turn it into high-level keywords (think categories, abstract concepts, action verbs, adjectives, …). You always return between 3 and 10 keywords (depending on how much you think are needed to describe the copy as acurately as possible), the first one being the most important, the last one being the least important. If a brand name is mentioned, you must include it as a keyword. You only respond in English, no matter the input language.',
+        if (!$keywordsEmbedding) {
+            // Based on the copy, generate keywords that can be embedded
+            $keywordsResponse = OpenAI::chat()->create([
+                'model' => 'gpt-4o-mini',
+                'messages' => [
+                    [
+                        'role' => 'system',
+                        'content' => 'You are a helpful assistant that can take a piece of ui copy and turn it into high-level keywords (think categories, abstract concepts, action verbs, adjectives, …). You always return between 3 and 10 keywords (depending on how much you think are needed to describe the copy as acurately as possible), the first one being the most important, the last one being the least important. If a brand name is mentioned, you must include it as a keyword. You only respond in English, no matter the input language.',
+                    ],
+                    [
+                        'role' => 'user',
+                        'content' => "Return a comma-separated list of keywords for the following copy: '{$copy}'",
+                    ],
                 ],
-                [
-                    'role' => 'user',
-                    'content' => "Return a comma-separated list of keywords for the following copy: '{$copy}'",
-                ],
-            ],
-        ]);
+            ]);
 
-        $generatedKeywordsToEmbed = strtolower($keywordsResponse->choices[0]->message->content);
+            $generatedKeywordsToEmbed = strtolower($keywordsResponse->choices[0]->message->content);
 
-        Log::info('Generated keywords: '.$generatedKeywordsToEmbed);
-
-        // Generate embedding for user's copy
-        $embeddingResponse = OpenAI::embeddings()->create([
-            'model' => 'text-embedding-3-small',
-            'input' => $generatedKeywordsToEmbed,
-        ]);
-        $keywordsEmbedding = $embeddingResponse->embeddings[0]->embedding;
+            // Generate embedding for user's copy
+            $embeddingResponse = OpenAI::embeddings()->create([
+                'model' => 'text-embedding-3-small',
+                'input' => $generatedKeywordsToEmbed,
+            ]);
+            $keywordsEmbedding = $embeddingResponse->embeddings[0]->embedding;
+        }
 
         // Retrieve icon set
         $iconSet = IconSet::where('name', $iconSetName)->first();
@@ -89,6 +95,11 @@ class IconController extends Controller
             return true;
         });
 
+        // Remove already suggested icons
+        $filteredIcons = $filteredIcons->reject(function ($icon) use ($alreadySuggestedIcons) {
+            return in_array($icon->id, $alreadySuggestedIcons);
+        });
+
         // Calculate cosine similarity and sort
         $iconSimilarities = $filteredIcons
             ->map(function ($icon) use ($keywordsEmbedding) {
@@ -102,7 +113,7 @@ class IconController extends Controller
         // Get top 4 matches
         $suggestedIcons = $iconSimilarities->take(4)->map(function ($item) use ($copy) {
             $icon = $item['icon'];
-            $explanation = $this->generateExplanation($icon->name, $copy);
+            // $explanation = $this->generateExplanation($icon->name, $copy);
             $iconData = $icon->variants->mapWithKeys(function ($variant) {
                 return [
                     $variant->type => [
@@ -115,26 +126,31 @@ class IconController extends Controller
             return [
                 'id' => $icon->id,
                 'name' => $icon->name,
-                'explanation' => $explanation,
+                // 'explanation' => $explanation,
                 'iconData' => $iconData,
             ];
         })->values()->all();
 
-        $suggestion = $iconSet->suggestions()->create(['copy' => $copy, 'exclude_unmentioned_logos' => $excludeUnmentionedLogos, 'generated_keywords' => $generatedKeywordsToEmbed]);
+        if (!$suggestionId) {
+            $suggestion = $iconSet->suggestions()->create(['copy' => $copy, 'exclude_unmentioned_logos' => $excludeUnmentionedLogos, 'generated_keywords' => $generatedKeywordsToEmbed]);
+        } else {
+            $suggestion = $iconSet->suggestions()->find($suggestionId);
+        }
+
         $suggestedIconIds = collect($suggestedIcons)->pluck('id')->all();
         $suggestion->icons()->attach($suggestedIconIds);
 
         $availableTypes =
             IconVariant::select('type')
-                ->whereIn('icon_id', $filteredIcons->pluck('id'))
-                ->distinct()
-                ->pluck('type')
-                ->map(function ($type) {
-                    return [
-                        'id' => $type,
-                        'name' => ucfirst($type),
-                    ];
-                });
+            ->whereIn('icon_id', $filteredIcons->pluck('id'))
+            ->distinct()
+            ->pluck('type')
+            ->map(function ($type) {
+                return [
+                    'id' => $type,
+                    'name' => ucfirst($type),
+                ];
+            });
 
         return Inertia::render('Icons/Index', [
             'iconSets' => IconSet::all(),
@@ -142,6 +158,8 @@ class IconController extends Controller
             'copy' => $copy,
             'excludeUnmentionedLogos' => $excludeUnmentionedLogos,
             'suggestedIcons' => $suggestedIcons,
+            'keywordsEmbedding' => $keywordsEmbedding,
+            'suggestionId' => $suggestion->id,
             'availableTypes' => $availableTypes,
         ]);
     }

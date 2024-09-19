@@ -12,27 +12,31 @@ import { Switch } from '@/Components/ui/switch';
 import { Textarea } from '@/Components/ui/textarea';
 import App from '@/Layouts/AppLayout';
 import { cn } from '@/lib/utils';
-import { PageProps } from '@/types';
-import { Head, useForm, usePage } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { IndexPageProps, PageProps } from '@/types';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { useEffect, useRef, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { toast } from 'sonner';
 
-export default function Index({
-    auth,
-    iconSets,
-    suggestedIcons,
-    availableTypes,
-}: PageProps<{
-    iconSets: IconSet[];
-    suggestedIcons: Icon[];
-    availableTypes: IconType[];
-}>) {
+export default function Index({ auth, iconSets, availableTypes }: IndexPageProps) {
     const { flash } = usePage<PageProps>().props;
     const [selectedType, setSelectedType] = useState<null | string>(null);
+    const [availableIcons, setAvailableIcons] = useState<Icon[]>([]);
+    const [keywordsEmbedding, setKeywordsEmbedding] = useState<string | null>(null);
+    const [suggestionId, setSuggestionId] = useState<number | null>(null);
+    const [loadMoreAttempts, setLoadMoreAttempts] = useState(0);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+    const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
     useHotkeys('mod+enter', () => handleSubmit(new Event('submit')), {
         enableOnFormTags: true,
+    });
+
+    useHotkeys('space', () => {
+        if (availableIcons?.length > 0 && !isLoadingMore) {
+            handleLoadMore();
+        }
     });
 
     useEffect(() => {
@@ -53,7 +57,51 @@ export default function Index({
     const handleSubmit = (e: React.FormEvent | Event) => {
         e.preventDefault();
         resetSelectedType();
-        post(route('icons.suggest'));
+        setLoadMoreAttempts(0);
+
+        if (textAreaRef.current) {
+            textAreaRef.current.blur();
+        }
+
+        post(route('icons.suggest'), {
+            preserveState: true,
+            preserveScroll: true,
+            onSuccess: (page) => {
+                setAvailableIcons(page.props.suggestedIcons as Icon[]);
+                setKeywordsEmbedding(page.props.keywordsEmbedding as string);
+                setSuggestionId(page.props.suggestionId as number);
+            },
+        });
+    };
+
+    // TODO: Figure out how I can catch 429 errors and show a toast message
+    const handleLoadMore = () => {
+        if (loadMoreAttempts < 3) {
+            setIsLoadingMore(true);
+            router.post(
+                route('icons.suggest'),
+                {
+                    copy: data.copy,
+                    iconSet: data.iconSet,
+                    excludeUnmentionedLogos: data.excludeUnmentionedLogos,
+                    alreadySuggestedIcons: availableIcons.map((icon) => icon.id),
+                    keywordsEmbedding,
+                    suggestionId,
+                },
+                {
+                    only: ['suggestedIcons'],
+                    preserveState: true,
+                    preserveScroll: true,
+                    onSuccess: (page) => {
+                        setAvailableIcons((prev) => [...prev, ...(page.props.suggestedIcons as Icon[])]);
+                        setIsLoadingMore(false);
+                        setLoadMoreAttempts(loadMoreAttempts + 1);
+                    },
+                },
+            );
+        } else {
+            toast.error('These were all the icons we could find for you. Try a different copy.');
+        }
     };
 
     const resetSelectedType = () => {
@@ -74,9 +122,9 @@ export default function Index({
     return (
         <App user={auth.user}>
             <Head title="Serving icons" />
-            <header className="container mt-8 max-w-3xl py-12">
+            <header className="container max-w-3xl py-12 mt-8">
                 <h1 className="text-muted-foreground">Icon Butler</h1>
-                <p className="scroll-m-20 text-2xl font-semibold tracking-tight">Always serving you the best icons.</p>
+                <p className="text-2xl font-semibold tracking-tight scroll-m-20">Always serving you the best icons.</p>
                 <div className="mt-4">
                     <Badge variant={'outline'}>Powered by the best open source icon sets</Badge>
                 </div>
@@ -84,7 +132,7 @@ export default function Index({
             <main className="container max-w-3xl py-8">
                 <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
                     <div className="flex flex-col gap-2">
-                        <div className="flex h-9 items-center justify-between">
+                        <div className="flex items-center justify-between h-9">
                             <Label>Your copy</Label>
                             {data.copy.length > 0 ? (
                                 <Button
@@ -114,6 +162,7 @@ export default function Index({
                         </div>
                         <Textarea
                             placeholder="Paste your copy here."
+                            ref={textAreaRef}
                             value={data.copy}
                             onChange={(e) => setData('copy', e.target.value)}
                             className="max-h-96 min-h-32"
@@ -190,15 +239,15 @@ export default function Index({
                 <div className="py-8">
                     <Separator />
                 </div>
-                {!suggestedIcons && !processing && (
-                    <div className="flex min-h-96 select-none items-center justify-center rounded border border-dashed p-16 text-center text-sm text-muted-foreground">
+                {(!availableIcons || availableIcons?.length === 0) && !processing && (
+                    <div className="flex items-center justify-center p-16 text-sm text-center border border-dashed rounded select-none min-h-96 text-muted-foreground">
                         Paste your copy above to get some icon suggestions.
                     </div>
                 )}
                 {processing && (
                     <>
                         <div className="mb-8">
-                            <Skeleton className="h-6 w-24" />
+                            <Skeleton className="w-24 h-6" />
                         </div>
                         <div className="grid grid-cols-2 gap-2">
                             <IconCardSkeleton />
@@ -208,7 +257,7 @@ export default function Index({
                         </div>
                     </>
                 )}
-                {suggestedIcons?.length > 0 && !processing && (
+                {availableIcons?.length > 0 && !processing && (
                     <>
                         <div className="mb-8">
                             {selectedType && (
@@ -232,10 +281,37 @@ export default function Index({
                             )}
                         </div>
                         <div className="grid grid-cols-2 gap-2">
-                            {suggestedIcons.map((icon) => (
+                            {availableIcons.map((icon) => (
                                 <IconCard key={icon.id} icon={icon} selectedType={selectedType ?? ''} />
                             ))}
                         </div>
+                        {loadMoreAttempts < 3 && (
+                            <div className="flex flex-col items-center justify-center gap-1 mt-8">
+                                <Button
+                                    variant={'outline'}
+                                    onClick={handleLoadMore}
+                                    disabled={isLoadingMore}
+                                    className="flex items-center gap-1"
+                                >
+                                    {isLoadingMore ? (
+                                        <div className="flex items-center gap-1">
+                                            <Spinner />
+                                            <span>Loading more icons…</span>
+                                        </div>
+                                    ) : (
+                                        'Load more icons'
+                                    )}
+                                </Button>
+                                <p
+                                    className={cn([
+                                        'text-sm text-muted-foreground',
+                                        data.copy.length < 3 && 'opacity-0',
+                                    ])}
+                                >
+                                    space
+                                </p>
+                            </div>
+                        )}
                     </>
                 )}
             </main>

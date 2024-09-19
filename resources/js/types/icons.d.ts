@@ -11,7 +11,7 @@ type IconType = {
 type Icon = {
     id: number;
     name: string;
-    explanation: string;
+    explanation?: string;
     iconData: {
         [key: string]: IconStyle;
     };

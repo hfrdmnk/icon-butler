@@ -28,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         RateLimiter::for('suggestions', function ($request) {
-            return Limit::perMinute(4)->by(optional($request->user())->id ?: $request->ip());
+            return Limit::perMinute(10)->by(optional($request->user())->id ?: $request->ip());
         });
     }
 }
