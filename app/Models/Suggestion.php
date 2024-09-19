@@ -13,6 +13,7 @@ class Suggestion extends Model
 
     protected $fillable = [
         'copy',
+        'generated_keywords',
     ];
 
     public function icons(): BelongsToMany
