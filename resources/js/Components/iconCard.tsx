@@ -1,6 +1,7 @@
 import { Button } from '@/Components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/Components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/Components/ui/tooltip';
+import { prepareWebflowObject } from '@/lib/webflow';
 import { ClipboardIcon } from '@radix-ui/react-icons';
 import { toast } from 'sonner';
 
@@ -21,6 +22,23 @@ export default function IconCard({ icon, selectedType }: { icon: Icon; selectedT
         }
     };
 
+    const copyAsWebflowElement = (icon: Icon) => {
+        const webflowObject = prepareWebflowObject(icon.iconData[selectedType].svg_content);
+
+        const clipboardData = new ClipboardEvent('').clipboardData || new DataTransfer();
+        clipboardData.setData('text/plain', webflowObject);
+
+        document.addEventListener('copy', function onCopy(e: ClipboardEvent) {
+            e.clipboardData?.setData('application/json', webflowObject);
+            e.preventDefault();
+            document.removeEventListener('copy', onCopy);
+        });
+
+        document.execCommand('copy');
+
+        toast.success(`Copied "${icon.name}" as Webflow element to clipboard`);
+    };
+
     return (
         <Card key={icon.id} className="flex flex-col">
             <CardHeader>
@@ -36,7 +54,7 @@ export default function IconCard({ icon, selectedType }: { icon: Icon; selectedT
                     <p className="text-muted-foreground">{icon.explanation}</p>
                 </CardContent>
             )}
-            <CardFooter className="mt-auto">
+            <CardFooter className="mt-auto flex gap-1">
                 <TooltipProvider>
                     <Tooltip>
                         <TooltipTrigger asChild>
@@ -46,6 +64,18 @@ export default function IconCard({ icon, selectedType }: { icon: Icon; selectedT
                         </TooltipTrigger>
                         <TooltipContent>
                             <p>Copy SVG to clipboard</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button variant={'outline'} onClick={() => copyAsWebflowElement(icon)}>
+                                <img src="/assets/webflow-logo.svg" alt="Webflow Logo" className="h-4 w-4" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Copy as Webflow element to clipboard</p>
                         </TooltipContent>
                     </Tooltip>
                 </TooltipProvider>
