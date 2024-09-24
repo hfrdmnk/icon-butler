@@ -1,11 +1,3 @@
-<svg width="500" height="500" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g clip-path="url(#clip0_1939_259)">
-<path d="M250 500C388.071 500 500 388.071 500 250C500 111.929 388.071 0 250 0C111.929 0 0 111.929 0 250C0 388.071 111.929 500 250 500Z" fill="#146EF5"/>
-<path fill-rule="evenodd" clip-rule="evenodd" d="M418 164L322.274 351.15H232.36L272.422 273.587H270.624C237.574 316.494 188.262 344.741 118 351.15V274.661C118 274.661 162.948 272.006 189.372 244.223H118V164.001H198.214V229.982L200.015 229.975L232.794 164.001H293.458V229.564L295.257 229.561L329.266 164H418Z" fill="white"/>
-</g>
-<defs>
-<clipPath id="clip0_1939_259">
-<rect width="500" height="500" fill="white"/>
-</clipPath>
-</defs>
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M64 12L43.5785 52H24.3968L32.9434 35.4223H32.5598C25.5091 44.5929 14.9892 50.6302 0 52V35.6518C0 35.6518 9.58891 35.0844 15.226 29.1462H0V12.0002H17.1123V26.1025L17.4965 26.101L24.4894 12.0002H37.431V26.0131L37.8148 26.0125L45.0701 12H64Z" fill="currentColor"/>
 </svg>

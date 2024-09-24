@@ -54,7 +54,7 @@ export default function IconCard({ icon, selectedType }: { icon: Icon; selectedT
                     <p className="text-muted-foreground">{icon.explanation}</p>
                 </CardContent>
             )}
-            <CardFooter className="mt-auto flex gap-1">
+            <CardFooter className="mt-auto flex gap-2">
                 <TooltipProvider>
                     <Tooltip>
                         <TooltipTrigger asChild>
@@ -70,7 +70,7 @@ export default function IconCard({ icon, selectedType }: { icon: Icon; selectedT
                 <TooltipProvider>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <Button variant={'outline'} onClick={() => copyAsWebflowElement(icon)}>
+                            <Button variant={'ghost'} onClick={() => copyAsWebflowElement(icon)}>
                                 <img src="/assets/webflow-logo.svg" alt="Webflow Logo" className="h-4 w-4" />
                             </Button>
                         </TooltipTrigger>
