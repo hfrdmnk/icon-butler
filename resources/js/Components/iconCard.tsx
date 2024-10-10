@@ -1,3 +1,4 @@
+import WebflowLogo from '@/../../public/assets/webflow-logo.svg?react';
 import { Button } from '@/Components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/Components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/Components/ui/tooltip';
@@ -71,7 +72,7 @@ export default function IconCard({ icon, selectedType }: { icon: Icon; selectedT
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button variant={'ghost'} onClick={() => copyAsWebflowElement(icon)}>
-                                <img src="/assets/webflow-logo.svg" alt="Webflow Logo" className="h-4 w-4" />
+                                <WebflowLogo className="h-4 w-4 text-bloq" />
                             </Button>
                         </TooltipTrigger>
                         <TooltipContent>

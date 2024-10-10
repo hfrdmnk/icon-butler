@@ -259,7 +259,7 @@ export default function Index({ auth, iconSets, availableTypes }: IndexPageProps
                         <div className="mb-8">
                             <Skeleton className="h-6 w-24" />
                         </div>
-                        <div className="grid grid-cols-4 gap-2">
+                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                             <IconCardSkeleton />
                             <IconCardSkeleton />
                             <IconCardSkeleton />
@@ -290,7 +290,7 @@ export default function Index({ auth, iconSets, availableTypes }: IndexPageProps
                                 </div>
                             )}
                         </div>
-                        <div className="grid grid-cols-4 gap-2">
+                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                             {availableIcons.map((icon) => (
                                 <IconCard key={icon.id} icon={icon} selectedType={selectedType ?? ''} />
                             ))}
