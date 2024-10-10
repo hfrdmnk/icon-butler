@@ -16,6 +16,7 @@ use Inertia\Inertia;
 // });
 
 Route::get('/', [IconController::class, 'index'])->name('icons.index');
+Route::get('/about', [IconController::class, 'about'])->name('icons.about');
 
 Route::middleware(['throttle:suggestions'])->group(function () {
     Route::post('/', [IconController::class, 'suggestIcons'])->name('icons.suggest');

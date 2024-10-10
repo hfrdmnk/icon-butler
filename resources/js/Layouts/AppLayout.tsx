@@ -9,9 +9,20 @@ export default function App({ children, user }: PropsWithChildren<{ user: User }
         <div>
             <nav>
                 <div className="container flex max-w-3xl items-center justify-between py-4">
-                    <Link href="/" className="">
-                        <IconButlerLogo className="w-10 text-[#3D50FF]" />
+                    <Link href="/">
+                        <IconButlerLogo className="w-10" />
                     </Link>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <a
+                            href="mailto:info@bloqlabs.ch?subject=Icon%20Butler%20Feedback"
+                            className="transition hover:text-bloq"
+                        >
+                            Feedback?
+                        </a>
+                        <Link href="/about" className="transition hover:text-bloq">
+                            About
+                        </Link>
+                    </div>
                 </div>
             </nav>
             <div>{children}</div>

@@ -1,6 +1,6 @@
-import * as React from 'react';
 import { CaretSortIcon, CheckIcon, ChevronDownIcon, ChevronUpIcon } from '@radix-ui/react-icons';
 import * as SelectPrimitive from '@radix-ui/react-select';
+import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 
@@ -17,7 +17,7 @@ const SelectTrigger = React.forwardRef<
     <SelectPrimitive.Trigger
         ref={ref}
         className={cn(
-            'flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1',
+            'flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-bloq disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1',
             className,
         )}
         {...props}
@@ -130,13 +130,13 @@ SelectSeparator.displayName = SelectPrimitive.Separator.displayName;
 
 export {
     Select,
-    SelectGroup,
-    SelectValue,
-    SelectTrigger,
     SelectContent,
-    SelectLabel,
+    SelectGroup,
     SelectItem,
-    SelectSeparator,
-    SelectScrollUpButton,
+    SelectLabel,
     SelectScrollDownButton,
+    SelectScrollUpButton,
+    SelectSeparator,
+    SelectTrigger,
+    SelectValue,
 };

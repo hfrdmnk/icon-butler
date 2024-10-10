@@ -18,6 +18,11 @@ class IconController extends Controller
         ]);
     }
 
+    public function about()
+    {
+        return Inertia::render('Icons/About');
+    }
+
     public function suggestIcons(Request $request)
     {
         $validated = $request->validate([

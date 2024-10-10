@@ -122,12 +122,17 @@ export default function Index({ auth, iconSets, availableTypes }: IndexPageProps
     return (
         <App user={auth.user}>
             <Head title="Serving icons" />
-            <header className="container mt-8 max-w-3xl py-12">
+            <header className="container max-w-3xl py-12">
                 <h1 className="text-sm font-light text-muted-foreground">Icon Butler</h1>
                 <p className="scroll-m-20 text-2xl font-semibold tracking-tight">Always serving you the best icons.</p>
                 <div className="mt-4">
                     <Badge variant={'outline'}>Powered by the best open source icon sets</Badge>
                 </div>
+                <p className="mt-8 max-w-xl text-sm text-muted-foreground">
+                    Icon Butler is a simple tool, that allows you to find the perfect icon for your UI copy. It uses AI
+                    to find out the meaning behind your query and searches through a database of open source icons. You
+                    can then easily copy and paste your chosen icon into an app like Figma or Webflow.
+                </p>
             </header>
             <main className="container max-w-3xl py-8">
                 <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
@@ -230,7 +235,12 @@ export default function Index({ auth, iconSets, availableTypes }: IndexPageProps
                                     'Suggest me some icons!'
                                 )}
                             </Button>
-                            <p className={cn(['text-sm text-muted-foreground', data.copy.length < 3 && 'opacity-0'])}>
+                            <p
+                                className={cn([
+                                    'font-mono text-xs text-muted-foreground',
+                                    data.copy.length < 3 && 'opacity-0',
+                                ])}
+                            >
                                 ⌘ + enter
                             </p>
                         </div>
@@ -304,7 +314,7 @@ export default function Index({ auth, iconSets, availableTypes }: IndexPageProps
                                 </Button>
                                 <p
                                     className={cn([
-                                        'text-sm text-muted-foreground',
+                                        'font-mono text-xs text-muted-foreground',
                                         data.copy.length < 3 && 'opacity-0',
                                     ])}
                                 >

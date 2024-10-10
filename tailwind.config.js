@@ -67,6 +67,7 @@ export default {
                     4: 'hsl(var(--chart-4))',
                     5: 'hsl(var(--chart-5))',
                 },
+                bloq: 'hsl(var(--bloq))',
             },
             keyframes: {
                 'accordion-down': {
@@ -93,5 +94,5 @@ export default {
         },
     },
 
-    plugins: [forms, require('tailwindcss-animate')],
+    plugins: [forms, require('tailwindcss-animate'), require('@tailwindcss/typography')],
 };
