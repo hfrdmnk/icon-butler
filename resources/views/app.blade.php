@@ -12,6 +12,9 @@
         <!-- Favicon -->
         <link rel="icon" href="/favicon.png" type="image/png">
 
+        <!-- Analytics -->
+        <script defer data-domain="iconbutler.linea.studio" src="https://analytics.linea.studio/js/script.js"></script>
+
         <!-- Scripts -->
         @routes
         @viteReactRefresh
