@@ -17,7 +17,7 @@ export default function Index({ auth }: PageProps) {
                         Linea
                     </a>{' '}
                     and Webflow agency{' '}
-                    <a href="https://bloqlabs.ch" target="_blank">
+                    <a href="https://www.bloqlabs.ch/webflow-agentur" target="_blank">
                         Bloq Labs.
                     </a>
                 </p>
@@ -27,19 +27,21 @@ export default function Index({ auth }: PageProps) {
                     <a href="mailto:info@bloqlabs.ch?subject=Icon%20Butler%20Feedback">reach out</a>!
                 </p>
                 <p>All used icons are available under the following licenses:</p>
-                <h2>Phosphor Icons:</h2>
-                <p>
-                    Link:{' '}
-                    <a href="https://phosphoricons.com/" target="_blank">
-                        phosphoricons.com
-                    </a>
-                </p>
-                <p>
-                    Github:{' '}
-                    <a href="https://github.com/phosphor-icons/" target="_blank">
-                        github.com/phosphor-icons
-                    </a>
-                </p>
+                <h2>Phosphor Icons</h2>
+                <ul>
+                    <li>
+                        Direct link:{' '}
+                        <a href="https://phosphoricons.com/" target="_blank">
+                            phosphoricons.com
+                        </a>
+                    </li>
+                    <li>
+                        GitHub:{' '}
+                        <a href="https://github.com/phosphor-icons/" target="_blank">
+                            github.com/phosphor-icons
+                        </a>
+                    </li>
+                </ul>
                 <h3>MIT License</h3>
                 <p>Copyright (c) 2020 Phosphor Icons</p>
                 <p>
@@ -60,19 +62,21 @@ export default function Index({ auth }: PageProps) {
                     OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
                     CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 </p>
-                <h2>Lucide Icons:</h2>
-                <p>
-                    Link:{' '}
-                    <a href="https://lucide.dev/icons/" target="_blank">
-                        lucide.dev/icons
-                    </a>
-                </p>
-                <p>
-                    Github:{' '}
-                    <a href="https://github.com/lucide-icons/" target="_blank">
-                        https://github.com/lucide-icons
-                    </a>
-                </p>
+                <h2>Lucide Icons</h2>
+                <ul>
+                    <li>
+                        Direct link:{' '}
+                        <a href="https://lucide.dev/icons/" target="_blank">
+                            lucide.dev/icons
+                        </a>
+                    </li>
+                    <li>
+                        GitHub:{' '}
+                        <a href="https://github.com/lucide-icons/" target="_blank">
+                            https://github.com/lucide-icons
+                        </a>
+                    </li>
+                </ul>
                 <h3>ISC License</h3>
                 <p>
                     Copyright (c) for portions of Lucide are held by Cole Bemis 2013-2022 as part of Feather (MIT). All

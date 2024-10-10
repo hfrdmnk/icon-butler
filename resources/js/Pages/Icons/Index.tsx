@@ -124,13 +124,16 @@ export default function Index({ auth, iconSets, availableTypes }: IndexPageProps
             <Head title="Serving icons" />
             <header className="container max-w-3xl py-12">
                 <h1 className="text-sm font-light text-muted-foreground">Icon Butler</h1>
-                <p className="scroll-m-20 text-2xl font-semibold tracking-tight">Always serving you the best icons.</p>
+                <p className="scroll-m-20 text-pretty text-2xl font-semibold tracking-tight">
+                    Always serving you the best icons.{' '}
+                    <span className="font-light text-muted-foreground">A designer’s/developer’s best friend.</span>
+                </p>
                 <div className="mt-4">
-                    <Badge variant={'outline'}>Powered by the best open source icon sets</Badge>
+                    <Badge variant={'outline'}>Powered by high-quality open-source icon sets</Badge>
                 </div>
                 <p className="mt-8 max-w-xl text-sm text-muted-foreground">
-                    Icon Butler is a simple tool, that allows you to find the perfect icon for your UI copy. It uses AI
-                    determine the meaning behind your query and searches through a database of open-source icons. You
+                    Icon Butler is a simple tool that allows you to find the perfect icon for your UI copy. It uses AI
+                    to determine the meaning behind your query and searches through a database of open-source icons. You
                     can then easily copy and paste your chosen icon into an app like Figma or Webflow.
                 </p>
             </header>
@@ -324,6 +327,24 @@ export default function Index({ auth, iconSets, availableTypes }: IndexPageProps
                         )}
                     </>
                 )}
+                <div className="bloq-gradient-bg relative mt-8 rounded p-8 text-primary-foreground">
+                    <div className="relative z-10">
+                        <div className="mb-4 text-sm">
+                            <p>Need help turning your Figma design into a website?</p>
+                            <p>Tired of WordPress?</p>
+                        </div>
+                        <p className="text-xl font-semibold">We’ve got you covered!</p>
+                        <p className="text-sm">Bloq Labs is the #1 Webflow agency in Switzerland.</p>
+                        <div className="mt-4">
+                            <Button asChild variant={'secondary'}>
+                                <a href="https://www.bloqlabs.ch/webflow-agentur" target="_blank">
+                                    Reach out today
+                                </a>
+                            </Button>
+                        </div>
+                    </div>
+                    <div className="bloq-checkered-grid absolute inset-0 z-0"></div>
+                </div>
             </main>
         </App>
     );

@@ -26,14 +26,14 @@ export default function App({ children, user }: PropsWithChildren<{ user: User }
                 </div>
             </nav>
             <div>{children}</div>
-            <footer className="container py-12 text-center text-sm text-muted-foreground">
+            <footer className="container py-12 text-center font-mono text-xs text-muted-foreground">
                 <p>
                     A{' '}
                     <a href="https://linea.studio" target="_blank">
                         Linea
                     </a>{' '}
                     ×{' '}
-                    <a href="https://bloqlabs.ch" target="_blank">
+                    <a href="https://www.bloqlabs.ch/webflow-agentur" target="_blank">
                         Bloq Labs
                     </a>{' '}
                     projektli.
