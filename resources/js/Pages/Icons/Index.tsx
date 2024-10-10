@@ -123,7 +123,7 @@ export default function Index({ auth, iconSets, availableTypes }: IndexPageProps
         <App user={auth.user}>
             <Head title="Serving icons" />
             <header className="container mt-8 max-w-3xl py-12">
-                <h1 className="text-muted-foreground">Icon Butler</h1>
+                <h1 className="text-sm font-light text-muted-foreground">Icon Butler</h1>
                 <p className="scroll-m-20 text-2xl font-semibold tracking-tight">Always serving you the best icons.</p>
                 <div className="mt-4">
                     <Badge variant={'outline'}>Powered by the best open source icon sets</Badge>
@@ -141,7 +141,7 @@ export default function Index({ auth, iconSets, availableTypes }: IndexPageProps
                                         e.preventDefault();
                                         setData('copy', '');
                                     }}
-                                    className="px-0"
+                                    className="px-0 font-mono text-xs font-light text-muted-foreground"
                                 >
                                     Clear textarea
                                 </Button>
@@ -154,7 +154,7 @@ export default function Index({ auth, iconSets, availableTypes }: IndexPageProps
                                             setData('copy', text);
                                         });
                                     }}
-                                    className="px-0"
+                                    className="px-0 font-mono text-xs font-light text-muted-foreground"
                                 >
                                     Paste from clipboard
                                 </Button>
@@ -185,7 +185,7 @@ export default function Index({ auth, iconSets, availableTypes }: IndexPageProps
                                 })}
                             </SelectContent>
                         </Select>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="font-mono text-xs font-light text-muted-foreground">
                             More information on this icon set:{' '}
                             <a
                                 href={iconSets.find((s) => s.name === data.iconSet)?.url}
@@ -211,7 +211,7 @@ export default function Index({ auth, iconSets, availableTypes }: IndexPageProps
                                             Exclude company logos not explicitly mentioned
                                         </Label>
                                     </div>
-                                    <p className="text-sm text-muted-foreground">
+                                    <p className="font-mono text-xs font-light text-muted-foreground">
                                         This usually results in a more accurate match.
                                     </p>
                                 </div>
@@ -240,7 +240,7 @@ export default function Index({ auth, iconSets, availableTypes }: IndexPageProps
                     <Separator />
                 </div>
                 {(!availableIcons || availableIcons?.length === 0) && !processing && (
-                    <div className="flex min-h-96 select-none items-center justify-center rounded border border-dashed p-16 text-center text-sm text-muted-foreground">
+                    <div className="flex min-h-96 select-none items-center justify-center rounded border border-dashed p-16 text-center font-mono text-xs font-light text-muted-foreground">
                         Paste your copy above to get some icon suggestions.
                     </div>
                 )}
