@@ -4,11 +4,13 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title inertia>{{ config('app.name', 'Laravel') }}</title>
+        <title inertia>{{ config('app.name', 'Icon Butler') }}</title>
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <!-- Meta Tags -->
+        <meta name="description" content="Icon Butler is a simple tool, that allows you to find the perfect icon for your UI copy. " />
+
+        <!-- Favicon -->
+        <link rel="icon" href="/favicon.png" type="image/png">
 
         <!-- Scripts -->
         @routes

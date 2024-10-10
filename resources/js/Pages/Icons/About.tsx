@@ -12,11 +12,11 @@ export default function Index({ auth }: PageProps) {
             </header>
             <main className="container prose prose-sm max-w-3xl py-8 prose-headings:font-semibold prose-a:font-medium">
                 <p>
-                    Icon Butler is a collaboration project between the product studio{' '}
+                    Icon Butler is a collaboration project between product studio{' '}
                     <a href="https://linea.studio" target="_blank">
                         Linea
                     </a>{' '}
-                    and the Webflow agency{' '}
+                    and Webflow agency{' '}
                     <a href="https://bloqlabs.ch" target="_blank">
                         Bloq Labs.
                     </a>

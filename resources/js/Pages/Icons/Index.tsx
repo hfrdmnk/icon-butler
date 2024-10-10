@@ -130,7 +130,7 @@ export default function Index({ auth, iconSets, availableTypes }: IndexPageProps
                 </div>
                 <p className="mt-8 max-w-xl text-sm text-muted-foreground">
                     Icon Butler is a simple tool, that allows you to find the perfect icon for your UI copy. It uses AI
-                    to find out the meaning behind your query and searches through a database of open source icons. You
+                    determine the meaning behind your query and searches through a database of open-source icons. You
                     can then easily copy and paste your chosen icon into an app like Figma or Webflow.
                 </p>
             </header>
