@@ -7,7 +7,7 @@
         <title inertia>{{ config('app.name', 'Icon Butler') }}</title>
 
         <!-- Meta Tags -->
-        <meta name="description" content="Icon Butler is a simple tool, that allows you to find the perfect icon for your UI copy. " />
+        <meta name="description" content="Icon Butler is a simple tool that allows you to find the perfect icon for your UI copy. " />
 
         <!-- Favicon -->
         <link rel="icon" href="/favicon.png" type="image/png">
