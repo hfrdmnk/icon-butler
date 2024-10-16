@@ -12,6 +12,9 @@
         <!-- Favicon -->
         <link rel="icon" href="/favicon.png" type="image/png">
 
+        <!-- OG Image -->
+        <meta property="og:image" content="https://iconbutler.linea.studio/og-image.jpg" />
+
         <!-- Analytics -->
         <script defer data-domain="iconbutler.linea.studio" src="https://analytics.linea.studio/js/script.js"></script>
 
